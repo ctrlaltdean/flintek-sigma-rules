@@ -1,0 +1,23 @@
+title: OPTIMJACK Optimizely Supply Chain - C2 Network Connection
+id: 7a1e2b3c-9f10-4e2a-8b3d-optimjack0003
+status: experimental
+description: Detects outbound connections to OPTIMJACK C2 IP infrastructure (EDR/firewall network events)
+references:
+    - https://www.cynet.com/blog/optimjack-malicious-web-injection-across-cnn-zoom-salesforce-fox-and-more/
+author: MILO
+date: 2026-11-17
+tags:
+    - attack.command-and-control
+    - attack.t1071
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp:
+            - '136.113.106.136'
+            - '34.96.213.201'
+            - '34.87.36.58'
+    condition: selection
+falsepositives:
+    - Shared GCP IP space could theoretically host unrelated services; low probability given narrow IOC scope
+level: high

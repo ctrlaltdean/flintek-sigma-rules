@@ -1,0 +1,31 @@
+title: OPTIMJACK Optimizely Supply Chain - Malicious Proxy/Web Request
+id: 7a1e2b3c-9f10-4e2a-8b3d-optimjack0002
+status: experimental
+description: Detects HTTP(S) requests to OPTIMJACK payload/exfil hosts and known malicious URL paths
+references:
+    - https://www.stepsecurity.io/blog/optimjack-optimizely-hosted-scripts-crypto-clipper-card-skimmer
+author: MILO
+date: 2026-11-17
+tags:
+    - attack.exfiltration
+    - attack.t1071.001
+logsource:
+    category: proxy
+detection:
+    selection_domain:
+        c-uri|contains:
+            - '1688360.cc'
+            - 'webshell.lol'
+    selection_path:
+        c-uri-stem|contains:
+            - '/track.js'
+            - '/hit.php'
+            - '/card.php'
+            - '/html2canvas.min.js'
+            - '/boot.js'
+            - '/JIUJIU888/'
+            - '/A8/a.html'
+    condition: selection_domain or selection_path
+falsepositives:
+    - None expected
+level: critical

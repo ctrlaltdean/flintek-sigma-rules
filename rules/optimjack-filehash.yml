@@ -1,0 +1,23 @@
+title: OPTIMJACK Optimizely Malicious Script Hash - File/Process Match
+id: 7a1e2b3c-9f10-4e2a-8b3d-optimjack0004
+status: experimental
+description: Detects known OPTIMJACK track.js/boot.js payload hashes seen on disk or in browser cache/EDR file events
+references:
+    - https://thecybersecguru.com/news/optimizely-supply-chain-attack-optimjack/
+author: MILO
+date: 2026-11-17
+tags:
+    - attack.execution
+logsource:
+    category: file_event
+detection:
+    selection:
+        Hashes|contains:
+            - '617df364120adc47fb4f55dcc0c69a9b6c9e108a92c60bc2b64a266254ab02f3'
+            - '814a963c0da480e2449d9b6664480156e1cd6d731014117401bf635badec3a0f'
+            - 'f7b84b9a94f749f8ced3f0112d0a66894e8bbc3b4aa5592021d1b8976a9bad40'
+            - '2f69879f1c5bdfe9c075ef67ddb6405afe992aff89dcf42863567f83237d3ba'
+    condition: selection
+falsepositives:
+    - None expected
+level: critical
