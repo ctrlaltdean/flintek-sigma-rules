@@ -1,0 +1,52 @@
+title: Shai-Hulud npm Worm - Known Payload/Tarball Hash Match
+id: 5566b5c1-5dc9-4a04-8b73-896c49f66c93
+status: experimental
+description: |
+    Detects known Shai-Hulud/ChainDrop npm worm package tarballs and payload
+    files (setup.mjs loader, Math_Symbol.js/math_init.js second-stage payload)
+    by hash, consolidated across the Jun 2026 (@redhat-cloud-services /
+    "Miasma"), Aug 2026 (keyv/cacheable/file-entry-cache / "ChainDrop"), and
+    Oct 2026 (tensorlake) waves. Hashes differ by wave/variant - all are
+    campaign-confirmed, not generic.
+references:
+    - https://secure.software/npm/packages/file-entry-cache/malware/11.1.6
+    - https://safedep.io/blog/redhat-cloud-services-hit-by-mini-shai-hulud-npm-worm
+    - https://www.elastic.co/security-labs/shai-hulud-chaindrop-npm-supply-chain
+    - https://blog.centriole.io/shai-hulud-here-we-go-again
+    - https://www.stingrai.io/blog/shai-hulud-2026-chaindrop-tensorlake-npm-checklist
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.execution
+    - attack.t1195.002
+logsource:
+    category: file_event
+detection:
+    selection:
+        Hashes|contains:
+            # @redhat-cloud-services wave (Jun 2026, "Miasma") - SHA-256
+            - '031ba872d5a84bfb18115f432811e4b45180346a1bae653f7fd85f918e7bb3a3'
+            - 'df1732f5bfec12e066be44dee02ec8a243e4868d38672c1b1d065359dd735a14'
+            - '0dc06ecdaa63fe24859cfd955053c23245c536e4733480239d14bebf12688e35'
+            # keyv/cacheable/file-entry-cache wave (Aug 2026, "ChainDrop") - SHA-256
+            - '81b543f999f5a9c0fc099808c118aa6332e1d84bd0356cc48178d17af5c4c396'
+            - '9fc2570b7cef51c1b8df116d144d11ff4096357be7d2c4c6367cfc2509cf1bcc'
+            - 'fd3ca4007b225fdf8de7af4345a19179d5efa8c4bb9205f88cda806e5684b1eb'
+            - '54dc7ea54a1317cca0e890a2770630cf7fa6c97813e0cb9d2caa93012b350668'
+            # keyv/cacheable/file-entry-cache wave - SHA-1
+            - '35a672cf34b996b91f3e1c28cbf3a05a37e036e4'
+            - '686aa40d0fc22c8d569494543a0f891f359f2f99'
+            - 'f525d52ceb966516686b482d3dc0137028cc6a63'
+            # tensorlake wave (Oct 2026) - SHA-1 / SHA-256
+            - '843a898ab72793568d77c53ff9282e6ce7c66aea'
+            - '25a0735d0db7dc40e5d45ce42d9c106067e6a66e184d967cfecfab17c3bcb5ef'
+            - 'b50a00900399ba99fb6ce1fc151519cb99d44320ef2a631f2237e1aea0ad6fec'
+    condition: selection
+falsepositives:
+    - None expected - these are hashes of malicious campaign artifacts, not
+      shared/benign code. Note Math_Symbol.js/math_init.js is intentionally
+      byte-identical across many packages within a wave, so a single hash hit
+      can indicate dozens of affected packages in your environment - do not
+      treat it as an isolated single-package incident without checking
+      node_modules broadly.
+level: critical

@@ -1,0 +1,52 @@
+title: Shai-Hulud npm Worm - C2/Dead-Drop Domain DNS Query
+id: 2f9391b5-a411-4129-82d5-846c11f9c090
+status: experimental
+description: |
+    Detects DNS queries to Shai-Hulud/ChainDrop npm worm C2 and dead-drop-resolver
+    infrastructure observed across the Aug 2026 (keyv/cacheable/file-entry-cache,
+    "ChainDrop") and Oct 2026 (tensorlake) waves. The payload resolves its live
+    exfil domain at runtime via an Ethereum smart-contract dead drop, so public
+    Ethereum RPC endpoints are included as secondary indicators (they are also
+    legitimate infrastructure - see falsepositives).
+references:
+    - https://www.elastic.co/security-labs/shai-hulud-chaindrop-npm-supply-chain
+    - https://www.stepsecurity.io/blog/tensorlake-npm-compromised-hostage-token-worm
+    - https://tuxcare.com/blog/npm-attack-tensorlake/
+    - https://blog.centriole.io/shai-hulud-here-we-go-again
+    - https://www.wiz.io/blog/keyv-cacheable-npm-packages-hijacked-supply-chain-attack
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+    - attack.t1568.001
+logsource:
+    category: dns
+detection:
+    selection_c2_exact:
+        query:
+            - 'npm-cache.com'
+            - 'awqhnjewqjkl.icu'
+            - 'iseekaigogo.com'
+    selection_c2_subdomain:
+        query|endswith:
+            - '.npm-cache.com'
+            - '.awqhnjewqjkl.icu'
+            - '.iseekaigogo.com'
+    selection_ethereum_dead_drop:
+        query:
+            - 'go.getblock.io'
+            - 'eth.llamarpc.com'
+            - 'eth-mainnet.nodereal.io'
+    condition: selection_c2_exact or selection_c2_subdomain or selection_ethereum_dead_drop
+falsepositives:
+    - selection_c2_exact/selection_c2_subdomain - none expected; these are
+      attacker-registered/controlled domains tied to this campaign
+    - selection_ethereum_dead_drop - HIGH false-positive risk. These are
+      legitimate public Ethereum RPC providers used by normal Web3/crypto
+      tooling. Only treat a hit as suspicious when the querying process is
+      node/npm/bun or a CI runner with no legitimate Web3 workload, or when it
+      co-occurs with selection_c2_exact/subdomain hits or the process_creation
+      rule in this folder. Do not alert on this sub-selection alone in
+      environments with legitimate blockchain/Web3 development activity.
+level: high

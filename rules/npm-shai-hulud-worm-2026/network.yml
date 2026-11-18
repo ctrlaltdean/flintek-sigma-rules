@@ -1,0 +1,42 @@
+title: Shai-Hulud npm Worm - Cloud Metadata Credential Theft from Node/Bun Process
+id: 037b16ef-f781-4c23-abb1-38a44f023762
+status: experimental
+description: |
+    Detects a Node.js, npm or Bun process reaching AWS Instance Metadata Service
+    (IMDS) or ECS task-credential endpoints, consistent with the Shai-Hulud/
+    ChainDrop npm worm's cloud-credential-harvesting stage (triggered by a
+    malicious preinstall/postinstall hook such as setup.mjs). IMDS access itself
+    is legitimate inside many AWS workloads - this rule is scoped to the process
+    image to reduce noise, but still requires environmental tuning.
+references:
+    - https://secure.software/npm/packages/file-entry-cache/malware/11.1.6
+    - https://safedep.io/blog/redhat-cloud-services-hit-by-mini-shai-hulud-npm-worm
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.credential-access
+    - attack.t1552.005
+    - attack.t1078.004
+logsource:
+    category: network_connection
+detection:
+    selection_dest:
+        DestinationIp:
+            - '169.254.169.254'
+            - '169.254.170.2'
+    selection_process:
+        Image|endswith:
+            - '\node.exe'
+            - '/node'
+            - '\bun.exe'
+            - '/bun'
+            - '\npm.cmd'
+            - '/npm'
+    condition: selection_dest and selection_process
+falsepositives:
+    - Legitimate AWS SDK/CLI code running under Node.js (e.g. Lambda, ECS tasks,
+      EC2 app code, CDK/Terraform tooling) routinely queries these same
+      endpoints. Deploy as high-priority triage, not auto-block, and tune per
+      environment baseline (expected IMDS-calling Node services) before
+      enforcing.
+level: medium
