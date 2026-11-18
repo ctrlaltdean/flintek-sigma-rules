@@ -1,0 +1,45 @@
+title: cPGuard OpsShield Update Hijack - Backdoor Shell, Loot Staging and Cron Persistence
+id: b20c841c-899b-4ad6-b8e0-59e7c466c9e5
+status: experimental
+description: |
+    Detects on-disk artifacts left on Linux servers by the malicious cPGuard
+    update script distributed during the OpsShield autoupdate-channel hijack
+    (2026-11-02, 02:08-03:20 UTC, cPGuard 5.88.12-5.88.19): the malicious
+    installer itself, the hidden setuid-root backdoor shell, the loot
+    staging/collection directory and archive, and the i93677 cron
+    persistence task. Absence of these artifacts after updating to 5.88.25+
+    is NOT conclusive - the vendor's own corrective update deletes them, so
+    absence does not prove the script never ran; use OpsShield's
+    install_log check as a complementary indicator.
+references:
+    - https://opsshield.com/notice/cpguard-update-channel-compromise.html
+    - https://opsshield.com/notice/security-incident-disclosure-servermanage.html
+    - https://thehackernews.com/2026/11/cpguard-update-channel-hijacked-to.html
+    - https://www.bleepingcomputer.com/news/security/hackers-hijack-cpguard-autoupdate-to-deploy-backdoor-steal-data/
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.persistence
+    - attack.t1053.003
+    - attack.defense-evasion
+    - attack.t1222.002
+    - attack.collection
+    - attack.t1560.001
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection_script:
+        TargetFilename|contains: 'cpguard-v58812-i91511'
+    selection_backdoor_shell:
+        TargetFilename: '/var/tmp/.cpg91511_sh'
+    selection_collection:
+        TargetFilename|startswith:
+            - '/var/tmp/.cpg91511'
+            - '/var/tmp/.i93677'
+    selection_cron:
+        TargetFilename: '/etc/cron.d/i93677'
+    condition: 1 of selection_*
+falsepositives:
+    - None expected - these are attacker-chosen, incident-specific filenames and paths
+level: critical

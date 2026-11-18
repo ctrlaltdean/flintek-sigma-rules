@@ -1,0 +1,43 @@
+title: cPGuard OpsShield Update Hijack - Webshell Probe Files and Exfil Endpoint Pattern
+id: a8d891b5-bc4c-4629-a17d-1bd4bd1acbec
+status: experimental
+description: |
+    Detects HTTP requests for the probe/webshell files and exfiltration
+    endpoint naming pattern OpsShield observed on its own compromised
+    billing/licensing web root during the attacker's initial-access phase
+    (2026-11-01): files following an "i9xxxx" naming convention
+    (i90248_probe.txt, i90573_probe.txt, i90573_sh.php, i90573_x.php) and
+    *_rx.php endpoints used to receive uploaded stolen data. Specific to the
+    confirmed artifact names/pattern from OpsShield's disclosure; the
+    "*_rx.php" wildcard is broader by design and may need tuning per
+    environment.
+references:
+    - https://opsshield.com/notice/security-incident-disclosure-servermanage.html
+    - https://thehackernews.com/2026/11/cpguard-update-channel-hijacked-to.html
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.exfiltration
+    - attack.t1041
+logsource:
+    category: webserver
+detection:
+    selection_named_files:
+        cs-uri-stem|contains:
+            - '/i90248_probe.txt'
+            - '/i90573_probe.txt'
+            - '/i90573_sh.php'
+            - '/i90573_x.php'
+    selection_pattern:
+        cs-uri-stem|re: '/i9\d{4}_(probe\.txt|sh\.php|x\.php)$'
+    selection_exfil_endpoint:
+        cs-uri-stem|endswith: '_rx.php'
+    condition: 1 of selection_*
+falsepositives:
+    - selection_exfil_endpoint ("*_rx.php") is broad by design and may match
+      unrelated application endpoints - tune or drop it if noisy in your
+      environment; the named-file and i9xxxx-pattern selections are narrow
+      and attacker-specific.
+level: high

@@ -1,0 +1,34 @@
+title: cPGuard OpsShield Update Hijack - Known Attacker Source IP
+id: 503d01eb-9afb-4936-a70c-c16cf8fa3f74
+status: experimental
+description: |
+    Detects firewall events with source IP 94.183.188.91, the
+    attacker-operator IP OpsShield identified for the probing, account
+    registration and command-execution stages of the cPGuard/OpsShield
+    update-channel hijack (2026-11-01/02). The IP sometimes sent a forged
+    "cPGuard/5.88.11" User-Agent string. This is a reconnaissance/initial-
+    access source IP against OpsShield's own billing/licensing portal
+    (manage.opsshield.com), NOT a confirmed C2 call-home address used by the
+    malicious update script on customer servers - scope this rule to
+    perimeter firewall logs of OpsShield-adjacent or similarly structured
+    billing/licensing infrastructure, and treat matches as recon/access
+    indicators rather than proof of a compromised endpoint.
+references:
+    - https://opsshield.com/notice/security-incident-disclosure-servermanage.html
+    - https://thehackernews.com/2026/11/cpguard-update-channel-hijacked-to.html
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.reconnaissance
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: firewall
+detection:
+    selection:
+        src_ip: '94.183.188.91'
+    condition: selection
+falsepositives:
+    - Single-IP indicator - residential/VPS IP churn means this address may be
+      reassigned to an unrelated party over time; verify recency before acting.
+level: medium
