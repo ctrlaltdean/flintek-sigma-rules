@@ -1,0 +1,39 @@
+title: GhostAction GitHub Actions Supply Chain - Malicious Domain DNS Query
+id: 84786ac4-7758-4fd8-84d1-a7b0c3c995d5
+status: experimental
+description: Detects DNS queries to GhostAction C2/phishing domains, including the my-github[.]com
+    OAuth-token-harvesting lure (registered 2026-10-09) and legacy exfil infrastructure
+references:
+    - https://blog.fiscybersec.com/ghostaction-when-github-becomes-a-software-supply-chain-weapon
+    - https://cybersecuritynews.com/ghostaction-supply-chain-campaign/
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.credential-access
+    - attack.t1071.004
+    - attack.t1566
+detection:
+    selection_exact:
+        query:
+            - 'carte-avantage.com'
+            - 'bold-dhawan.45-139-104-115.plesk.page'
+            - 'objective-hopper.45-139-104-115.plesk.page'
+    selection_mygithub:
+        query:
+            - 'my-github.com'
+    selection_mygithub_sub:
+        query|endswith: '.my-github.com'
+    selection_oast:
+        query|endswith: '.oast.fun'
+    condition: selection_exact or selection_mygithub or selection_mygithub_sub or selection_oast
+logsource:
+    category: dns
+falsepositives:
+    - None expected for the exact-match legacy domains or my-github.com (base domain
+      and true subdomains only - anchored with endswith/exact match, not a loose
+      substring, to avoid matching lookalikes like my-github.com.example.org).
+      *.oast.fun is a generic Interactsh callback domain also used for benign security
+      testing/bug-bounty work - treat selection_oast as a weaker signal and correlate
+      with other GhostAction indicators (network.yml, proxy.yml) before acting on it alone.
+level: high

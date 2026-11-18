@@ -1,0 +1,29 @@
+title: GhostAction GitHub Actions Supply Chain - C2 Network Connection
+id: 56896a4f-4f01-43ac-a8a0-669760df4419
+status: experimental
+description: Detects outbound connections to current and legacy GhostAction C2 IP infrastructure used to receive exfiltrated GitHub Actions secrets (EDR/firewall network events)
+references:
+    - https://cybersecuritynews.com/ghostaction-supply-chain-campaign/
+    - https://blog.fiscybersec.com/ghostaction-when-github-becomes-a-software-supply-chain-weapon
+    - https://www.decryptiondigest.com/blog/ghostaction-github-actions-supply-chain-2026
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.exfiltration
+    - attack.command-and-control
+    - attack.t1567
+    - attack.t1071
+detection:
+    selection:
+        DestinationIp:
+            - '193.32.204.199'
+            - '170.39.218.2'
+            - '45.139.104.115'
+    condition: selection
+logsource:
+    category: network_connection
+falsepositives:
+    - None expected for 193.32.204.199 (current, active C2 as of Oct 2026). 170.39.218.2 and
+      45.139.104.115 are legacy/shared hosting IPs (Oct 2025-Mar 2026 wave) - lower confidence,
+      verify port/destination context before high-severity action on those two.
+level: high

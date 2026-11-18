@@ -1,0 +1,46 @@
+title: GhostAction GitHub Actions Supply Chain - Core Malicious Workflow/Commit Push
+id: a0ecb12e-5229-4287-8ef5-4b86d1513b3e
+status: experimental
+description: Detects a push event adding or modifying a distinctive GhostAction-named
+    workflow file, the font-stealer workstation payload, or one of GhostAction's confirmed
+    commit messages. Requires ingesting GitHub push-event WEBHOOK payloads (which carry
+    commits[].added/modified file paths and commits[].message) into your SIEM - the
+    native GitHub organization AUDIT LOG API does not expose per-commit file paths or
+    messages, only actor/action/timestamp, so this rule cannot be run against raw audit
+    log events without a webhook/App-based enrichment layer.
+references:
+    - https://cybersecuritynews.com/ghostaction-supply-chain-campaign/
+    - https://cybersecuritynews.com/ghostaction-github-repo-attack/
+    - https://blog.fiscybersec.com/ghostaction-when-github-becomes-a-software-supply-chain-weapon
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.initial-access
+    - attack.t1195.001
+    - attack.t1552
+detection:
+    selection_file:
+        file_path:
+            - '.github/workflows/github_actions_security.yml'
+            - '.github/workflows/security-check.yml'
+            - '.github/workflows/security-audit.yml'
+            - 'public/fonts/fa-solid-400.woff2'
+            - '.vscode/tasks.json'
+    selection_commit_msg:
+        commit_message:
+            - 'Add Github Actions Security workflow'
+            - 'Update Github Actions Security workflow'
+            - 'Add security check workflow'
+            - 'Add security audit workflow'
+            - 'Update security audit workflow'
+    condition: selection_file or selection_commit_msg
+logsource:
+    product: github
+    service: webhook
+falsepositives:
+    - A file name or commit message alone is not confirmed compromise. These five
+      filenames and five commit messages are distinctive (unlike the generic CI
+      names in github_push_generic.yml) but still verify workflow CONTENT - does it
+      reference secrets and curl POST to an external host (network.yml/proxy.yml IPs)?
+      - before treating a name/message-only match as a high-severity incident.
+level: high

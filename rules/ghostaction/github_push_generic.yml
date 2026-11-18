@@ -1,0 +1,39 @@
+title: GhostAction GitHub Actions Supply Chain - Generic CI Filename Push (Hunting)
+id: c0fd1722-7d8b-440c-9e17-acc824a04978
+status: experimental
+description: Low-confidence hunting rule for the "seven workflows" and self-hosted-runner
+    payload families, which reuse ordinary-sounding CI job filenames. Do NOT alert on
+    this rule in isolation - it exists to narrow a retrospective hunt (e.g. correlate
+    against repos that also hit github_push_core.yml, network.yml, or proxy.yml in the
+    same time window). Same webhook-ingestion caveat as github_push_core.yml applies.
+references:
+    - https://blog.fiscybersec.com/ghostaction-when-github-becomes-a-software-supply-chain-weapon
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.initial-access
+    - attack.t1195.001
+detection:
+    selection:
+        file_path:
+            - '.github/workflows/audit.yml'
+            - '.github/workflows/build-check.yml'
+            - '.github/workflows/repo-health.yml'
+            - '.github/workflows/lint.yml'
+            - '.github/workflows/ci-check.yml'
+            - '.github/workflows/test-suite.yml'
+            - '.github/workflows/code-review.yml'
+            - '.github/workflows/maintenance.yml'
+            - '.github/workflows/cache-cleanup.yml'
+            - '.github/workflows/runner-maintenance.yml'
+            - '.github/workflows/cleanup-job.yml'
+            - '.github/workflows/cleanup_cache.yml'
+    condition: selection
+logsource:
+    product: github
+    service: webhook
+falsepositives:
+    - High. Every one of these filenames is a plausible legitimate CI job name used
+      by countless unrelated repositories. This rule is informational/correlation-only
+      (see description) - it is deliberately NOT paired with level:high/critical.
+level: low

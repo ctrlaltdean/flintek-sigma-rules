@@ -1,0 +1,37 @@
+title: GhostAction GitHub Actions Supply Chain - Secret Exfiltration HTTP Request
+id: 9aeb7b35-6f89-4320-8607-6f388e3179c3
+status: experimental
+description: Detects outbound HTTP(S) requests matching GhostAction's secret-exfiltration
+    API paths and parameters on the known C2 IP/domains
+references:
+    - https://blog.fiscybersec.com/ghostaction-when-github-becomes-a-software-supply-chain-weapon
+    - https://www.decryptiondigest.com/blog/ghostaction-github-actions-supply-chain-2026
+    - https://cybersecuritynews.com/ghostaction-github-repo-attack/
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.exfiltration
+    - attack.t1567.001
+    - attack.t1071.001
+detection:
+    selection_host:
+        c-uri|contains:
+            - '193.32.204.199'
+            - 'my-github.com'
+    selection_path:
+        c-uri-stem|contains:
+            - '/api/workflow/receive'
+            - '/c2/'
+    selection_query:
+        c-uri-query|contains:
+            - '?c=monami'
+            - 'inj='
+    condition: selection_host or (selection_path and selection_query)
+logsource:
+    category: proxy
+falsepositives:
+    - selection_host (the C2 IP/domain) is the specific, standalone indicator. selection_path
+      ('/c2/') and selection_query ('inj=') are generic fragments that WILL false-positive
+      on unrelated applications if matched alone, so the condition only fires on that pair
+      when both appear together without a host match - do not loosen this to an OR.
+level: critical

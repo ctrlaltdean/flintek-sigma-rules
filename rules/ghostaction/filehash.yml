@@ -1,0 +1,29 @@
+title: GhostAction / PolinRider Co-Infection - Known Malicious File Hash
+id: 2091aa5a-6176-4ceb-bf00-8dc23dcbe652
+status: experimental
+description: Detects known file hashes for the PolinRider loader components observed
+    force-pushed into GhostAction-amended commits (Oct 22-26, 2026) and the font-stealer
+    payload disguised as a webfont. PolinRider is a separate campaign (unconfirmed DPRK
+    attribution) that overlaps with GhostAction victims; treat this rule as a secondary,
+    lower-confidence signal relative to the C2/network rules in this folder.
+references:
+    - https://blog.fiscybersec.com/ghostaction-when-github-becomes-a-software-supply-chain-weapon
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.execution
+    - attack.t1195.001
+detection:
+    selection:
+        Hashes|contains:
+            - 'b59e598ded824c7318ca9fae4e9a6d98c9600873677ece7d9896870e3e7ced8e'
+            - '7ba0a30eabfa46008d6417532533199bbf351b27f3841477e9133f43fb404d24'
+            - '284d167f51c93b90100b7faeaec971959c1f8bb642e7ea0de50190a5a306f3d8'
+    condition: selection
+logsource:
+    category: file_event
+falsepositives:
+    - None expected for exact hash matches. Attribution of PolinRider to GhostAction's
+      operator is explicitly unconfirmed by GitGuardian (working hypothesis only) -
+      do not report this as a GhostAction-attributed hash without noting that caveat.
+level: critical

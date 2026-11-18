@@ -1,0 +1,36 @@
+title: GhostAction GitHub Actions Supply Chain - curl Exfiltration Command on Runner
+id: 5cf86651-eb1c-4a46-8544-59f4f4d8f78f
+status: experimental
+description: Detects the curl POST exfiltration command pattern GhostAction's malicious
+    workflow steps execute on GitHub-hosted or self-hosted Actions runners to send
+    collected secrets to the C2 IP
+references:
+    - https://cybersecuritynews.com/ghostaction-supply-chain-campaign/
+    - https://blog.fiscybersec.com/ghostaction-when-github-becomes-a-software-supply-chain-weapon
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.exfiltration
+    - attack.t1552
+    - attack.t1567.001
+detection:
+    selection_cmd:
+        CommandLine|contains:
+            - 'curl'
+    selection_post:
+        CommandLine|contains:
+            - '-X POST'
+            - '--request POST'
+    selection_dest:
+        CommandLine|contains:
+            - '193.32.204.199'
+            - 'my-github.com'
+    condition: selection_cmd and selection_post and selection_dest
+logsource:
+    category: process_creation
+    product: linux
+falsepositives:
+    - None expected - the combination of curl, an explicit POST method, and the known
+      GhostAction C2 destination is a narrow, high-confidence combination. Legitimate
+      CI jobs do not post to this IP/domain.
+level: critical
