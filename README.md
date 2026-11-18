@@ -165,6 +165,40 @@ Distinct from the Oct 2026 ConnectWise ScreenConnect breach above. A threat acto
 
 **Caveat:** no file hashes published in the sources reviewed — rules are IP/domain/artifact-name based. Initial access vector before the RMM+ abuse was still under investigation as of the last advisory reviewed.
 
+### CVE-2026-90436 — Apache Axis RCE exploited against Confluence Data Center / N-able N-central (Nov 2026)
+
+Critical unsafe-reflection RCE in end-of-life Apache Axis 1.x, bundled by both Confluence Data Center and N-able N-central. Rapid7 MDR confirmed exploitation against Confluence Data Center (Nov 13, 2026). A separate N-able N-central incident is correlated by Rapid7 to this CVE but NOT vendor-confirmed as the same flaw — kept in its own clearly-flagged ruleset.
+
+- `rules/cve-2026-90436-axis-rce/network_connection_confluence.yml` - confirmed Confluence DC exploitation source IPs
+- `rules/cve-2026-90436-axis-rce/network_connection_ncentral_legacy_api.yml` - N-central C2/miner IPs (correlated, unconfirmed)
+- `rules/cve-2026-90436-axis-rce/webserver_ncentral_legacy_api.yml` - N-central SOAP fault request signature (correlated, unconfirmed)
+- `rules/cve-2026-90436-axis-rce/file_event_ncentral_legacy_api.yml` - N-central host artifact hash (correlated, unconfirmed)
+
+**Sources:** Rapid7 Emergent Threat Response (primary), Atlassian advisory, N-able's own Nov 13 update, rescana.com.
+
+**Caveat:** the N-able N-central link to CVE-2026-90436 is Rapid7's inference, not confirmed by N-able itself — treat those four IOCs as correlated, not verified.
+
+### BubbleLoader — trojanized software loader (WinRAR, x64dbg, Windows Media Player, Firefox Launcher, virtiofs) (Nov 2026)
+
+A loader/packer that patches a legitimate signed binary's entry point and appends two PNGs (one a rolling XOR key, one hiding XOR-encrypted shellcode) to turn common tools into malware carriers. Uses runtime polymorphism (CPU-timestamp-seeded padding overwrites) so the unpacked payload's hash changes every execution — only the on-disk tampered-carrier hashes are stable IOCs.
+
+- `rules/bubbleloader/file_event.yml` - hash match on 24 tampered carrier SHA-256s (primary, reliable)
+- `rules/bubbleloader/process_creation.yml` - behavioral RWX-alloc/ntdll-hook rule (schema placeholder, needs EDR field mapping)
+
+**Sources:** ReversingLabs (primary), kyberkit.com, Help Net Security.
+
+**Caveat:** file-based IOCs only — no domains/IPs were published for this campaign.
+
+### Microsoft agent-framework PyPI supply chain compromise (Nov 17, 2026)
+
+Microsoft's official `agent-framework` PyPI package was compromised twice ~33 minutes apart (v1.26.1, v1.26.2), both stealing Azure/CI credentials via a `.pth`-triggered payload at Python startup. Suspected uploader is a same-day-created PyPI account (`vibiret`), not confirmed by PyPI or Microsoft.
+
+- `rules/agent-framework-pypi-compromise/file_event.yml` - hash match on all 7 malicious wheel/.pth/.py artifacts
+
+**Sources:** safedep.io, Aikido Security (primary, independently cross-checked), ox.security.
+
+**Caveat:** the only network indicator is `webhook[.]site`, a legitimate shared service abused for exfil — documented as a hunting lead in the vault note, not forced into a Sigma rule.
+
 ## License
 
 Apache 2.0
