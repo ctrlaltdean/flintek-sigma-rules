@@ -1,5 +1,5 @@
 title: OPTIMJACK Optimizely Supply Chain - Malicious Domain DNS Query
-id: 7a1e2b3c-9f10-4e2a-8b3d-optimjack0001
+id: 60784a50-1ce9-4086-8be1-ab7c7f49cd85
 status: experimental
 description: Detects DNS queries to OPTIMJACK C2/exfil domains (1688360.cc, webshell.lol, .icu iOS-stage infra)
 references:
@@ -12,8 +12,8 @@ tags:
 logsource:
     category: dns
 detection:
-    selection:
-        query|contains:
+    selection_exact:
+        query:
             - '1688360.cc'
             - 'webshell.lol'
             - 'linkforge.cc'
@@ -26,7 +26,21 @@ detection:
             - 'gm38duxoihbmy5o.icu'
             - 'q1ls1ho9x7wsxlu.icu'
             - 'ios-hack.icu'
-    condition: selection
+    selection_subdomain:
+        query|endswith:
+            - '.1688360.cc'
+            - '.webshell.lol'
+            - '.linkforge.cc'
+            - '.l7bcsnwc7nzr3uo.icu'
+            - '.5vobauua3ojpklx.icu'
+            - '.p55abnw2pnsz0bo.icu'
+            - '.je4ft3gn8vxudum.icu'
+            - '.eil786npto9u5bq.icu'
+            - '.1y69gy2mdzaltz1.icu'
+            - '.gm38duxoihbmy5o.icu'
+            - '.q1ls1ho9x7wsxlu.icu'
+            - '.ios-hack.icu'
+    condition: selection_exact or selection_subdomain
 falsepositives:
     - None expected - these are attacker-registered domains
 level: critical

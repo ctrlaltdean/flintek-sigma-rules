@@ -1,5 +1,5 @@
 title: OPTIMJACK Optimizely Supply Chain - C2 Network Connection
-id: 7a1e2b3c-9f10-4e2a-8b3d-optimjack0003
+id: 05ad9fbe-c557-4731-b7cb-dcaceb05495c
 status: experimental
 description: Detects outbound connections to OPTIMJACK C2 IP infrastructure (EDR/firewall network events)
 references:

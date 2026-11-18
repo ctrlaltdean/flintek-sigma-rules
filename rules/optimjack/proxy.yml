@@ -1,5 +1,5 @@
 title: OPTIMJACK Optimizely Supply Chain - Malicious Proxy/Web Request
-id: 7a1e2b3c-9f10-4e2a-8b3d-optimjack0002
+id: 2492a5dc-75a5-474e-a220-76c3c0d5d574
 status: experimental
 description: Detects HTTP(S) requests to OPTIMJACK payload/exfil hosts and known malicious URL paths
 references:
@@ -12,10 +12,16 @@ tags:
 logsource:
     category: proxy
 detection:
-    selection_domain:
-        c-uri|contains:
+    selection_domain_exact:
+        c-uri:
             - '1688360.cc'
             - 'webshell.lol'
+    selection_domain_sub:
+        c-uri|contains:
+            - '//1688360.cc/'
+            - '.1688360.cc/'
+            - '//webshell.lol/'
+            - '.webshell.lol/'
     selection_path:
         c-uri-stem|contains:
             - '/track.js'
@@ -25,7 +31,9 @@ detection:
             - '/boot.js'
             - '/JIUJIU888/'
             - '/A8/a.html'
-    condition: selection_domain or selection_path
+    condition: selection_domain_exact or selection_domain_sub or selection_path
 falsepositives:
-    - None expected
+    - None expected for the domain selections. The path selection (selection_path)
+      is broader by design (catches the loader on any host) and may need tuning
+      if a legitimate app uses an identical path, e.g. /boot.js.
 level: critical
