@@ -6,8 +6,10 @@ Sigma is a vendor-agnostic rule format for log-based SIEM detections: write once
 
 ```bash
 pip install sigma-cli
-sigma convert -t splunk -p sentinel_asim rules/optimjack-dns.yml
+sigma convert -t splunk -p sentinel_asim rules/optimjack/dns.yml
 ```
+
+Rules are organized one subfolder per incident: `rules/<campaign-name>/<surface>.yml`.
 
 ## About this repo
 
@@ -21,10 +23,10 @@ Rules here are mostly researched and drafted by AI (open-source threat reporting
 
 Attacker gained write access to customer "Project JavaScript" fields on Optimizely Web Experimentation, serving a crypto clipper / card skimmer / cookie-screenshot stealer / iOS exploit loader to visitors of 178 organizations (BBC, CNN, Zoom, Salesforce, GitLab, HSBC, IKEA, etc.) via Optimizely's own trusted CDN.
 
-- `rules/optimjack-dns.yml` - DNS queries to C2/exfil domains
-- `rules/optimjack-proxy.yml` - HTTP(S) requests to malicious hosts/paths
-- `rules/optimjack-network.yml` - Outbound connections to C2 IPs
-- `rules/optimjack-filehash.yml` - Known payload file hashes
+- `rules/optimjack/dns.yml` - DNS queries to C2/exfil domains
+- `rules/optimjack/proxy.yml` - HTTP(S) requests to malicious hosts/paths
+- `rules/optimjack/network.yml` - Outbound connections to C2 IPs
+- `rules/optimjack/filehash.yml` - Known payload file hashes
 
 **Sources:** [Report URI](https://blog.report-uri.com/worlds-largest-brands-infected-with-malware-via-optimizely/), [StepSecurity](https://www.stepsecurity.io/blog/optimjack-optimizely-hosted-scripts-crypto-clipper-card-skimmer), [Cynet](https://www.cynet.com/blog/optimjack-malicious-web-injection-across-cnn-zoom-salesforce-fox-and-more/)
 
