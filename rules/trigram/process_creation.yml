@@ -1,0 +1,35 @@
+title: Trigram Campaign - ClickFix Dropper Script Execution
+id: a66dd41f-5643-4483-9409-4ac7ae3c0eb6
+status: experimental
+description: >
+  Detects execution of the named dropper/loader scripts used in the Trigram
+  campaign's ClickFix clipboard-hijack stage, which fetches a portable Node.js
+  runtime and the install_guard.js payload that deploys the OverLord infostealer.
+  Pair with clipboard/paste telemetry where available - these filenames alone
+  are a strong but not exclusive signal.
+references:
+  - https://securityonline.info/trigram-campaign-north-korea-clickfix
+  - https://www.stormshield.com/news/cti-trigram-campaign/
+author: MILO
+date: 2026-11-17
+tags:
+  - attack.execution
+  - attack.t1204.001
+  - attack.t1059
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_cmd:
+    CommandLine|contains:
+      - 'v.cmd'
+      - 'verify_w'
+      - 'install_guard.js'
+  selection_image:
+    Image|endswith:
+      - '\verify_w'
+      - '\v.cmd'
+  condition: selection_cmd or selection_image
+falsepositives:
+  - "install_guard.js and v.cmd are generic-sounding filenames; if hits occur outside the context of a recently-opened recruiting/conference/tracking site in a browser, verify before escalating. No known legitimate software ships these exact names per the sources reviewed."
+level: high

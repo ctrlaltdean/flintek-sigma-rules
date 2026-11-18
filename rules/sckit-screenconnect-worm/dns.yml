@@ -1,0 +1,38 @@
+title: SCKit ScreenConnect Worm - DNS Queries to Attacker Relay Domains
+id: 0b2cfde9-2351-4477-bdbb-44dc6e413b37
+status: experimental
+description: >
+  Detects DNS queries to attacker-registered relay/C2 domains used in the
+  Nov 2026 SCKit ScreenConnect worm campaign, including abused Dynamic DNS
+  subdomains (gotdns.org, homedns.org) - only the specific listed subdomains
+  are indicators, not the parent DynDNS providers.
+references:
+  - https://huntress.com/blog/sckit-worm-rogue-screenconnect
+  - https://thehackernews.com/2026/11/screenconnect-attacks-target-at-least.html
+author: MILO
+date: 2026-11-17
+tags:
+  - attack.command-and-control
+  - attack.t1071.001
+logsource:
+  category: dns
+  product: windows
+detection:
+  selection_exact:
+    query:
+      - 'ns.mo7sen.dev'
+      - 'sc.payproofkit.com'
+      - 'cdn007-digitaldownloads.com'
+      - 'newnewnew.gotdns.org'
+      - 'soxnewwork.homedns.org'
+  selection_subdomain:
+    query|endswith:
+      - '.mo7sen.dev'
+      - '.payproofkit.com'
+      - '.cdn007-digitaldownloads.com'
+  condition: selection_exact or selection_subdomain
+falsepositives:
+  - None expected for the exact relay subdomains. Do not extend this rule to
+    the bare 'gotdns.org' or 'homedns.org' parent domains - those are
+    legitimate Dynamic DNS providers with many unrelated customers.
+level: high

@@ -145,6 +145,26 @@ Rank Math PRO v3.0.123 was compromised (CVE-2026-111862, CVSS 9.8), serving mali
 
 **Caveat:** no hashes/IPs were ever published for this campaign — network/file surfaces only. `wordpress_application.yml` uses non-standard field names that need mapping to your actual WP logging setup.
 
+### Trigram — DPRK-linked infostealer/ClickFix campaign (Nov 2026)
+
+Stormshield CTI uncovered an industrialized campaign impersonating ~50 blockchain/AI/logistics brands (Ritual, Mina, Metis, Mantle, Linea, Fuel, Webflow, DHL, DPD, Aramex) via fake recruitment, conference, and package-tracking sites. A ClickFix clipboard-hijack trick runs a dropper that deploys the OverLord infostealer. Correlated by Stormshield to Kimsuky/DPRK (UNK_DeadDrop cluster) via a shared admin email and a MongoDB username reused in the Oct 31 2026 `antd-img-crop` npm compromise.
+
+- `rules/trigram/{dns,proxy,process_creation,process_creation_unix}.yml`
+
+**Sources:** Stormshield CTI (primary), The Hacker News, securityonline.info, SafeDep.
+
+**Caveat:** no file hashes published by any source reviewed — rules are domain/IP/process-based only. Stormshield's full IOC list runs to ~200 indicators; this note/ruleset captures the subset independently corroborated across 2+ sources, not the full list. Expect continued domain rotation.
+
+### SCKit — ConnectWise ScreenConnect worm campaign (Nov 11-13, 2026)
+
+Distinct from the Oct 2026 ConnectWise ScreenConnect breach above. A threat actor abused a blank-access-key flaw in the third-party RMM+ ScreenConnect extension to push rogue remote-access clients and a 16-file lateral-spread toolkit (SCKit, including a `RelayTrap` technician-session interceptor) across MSP-managed endpoints — 288 hosts/48 orgs in wave 1, 205 more hosts/41 orgs in wave 2 from new infrastructure.
+
+- `rules/sckit-screenconnect-worm/{network_connection,dns,file_event,persistence,scheduled_task}.yml`
+
+**Sources:** Microsoft Security Blog, Huntress (primary), The Hacker News, Beazley Security, ConnectWise Trust Center.
+
+**Caveat:** no file hashes published in the sources reviewed — rules are IP/domain/artifact-name based. Initial access vector before the RMM+ abuse was still under investigation as of the last advisory reviewed.
+
 ## License
 
 Apache 2.0

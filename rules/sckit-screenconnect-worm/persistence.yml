@@ -1,0 +1,24 @@
+title: SCKit ScreenConnect Worm - Persistence via Registry Run Key
+id: b8e54191-f666-401c-a815-51b6fd2a003b
+status: experimental
+description: >
+  Detects the "RelayTrapLiteAlert" registry Run key persistence mechanism
+  installed by the Nov 2026 SCKit ScreenConnect worm to maintain the rogue
+  ScreenConnect client / RelayTrap relay.
+references:
+  - https://huntress.com/blog/sckit-worm-rogue-screenconnect
+author: MILO
+date: 2026-11-17
+tags:
+  - attack.persistence
+  - attack.t1547.001
+logsource:
+  category: registry_event
+  product: windows
+detection:
+  selection_registry:
+    TargetObject|contains: '\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\RelayTrapLiteAlert'
+  condition: selection_registry
+falsepositives:
+  - None expected - RelayTrapLiteAlert is a campaign-specific registry value name with no known legitimate software using it.
+level: high

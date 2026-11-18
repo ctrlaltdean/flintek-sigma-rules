@@ -1,0 +1,29 @@
+title: Trigram Campaign - ClickFix Dropper Script Execution (Unix)
+id: 891eb192-1c2d-486a-99ea-8f9d274d42c0
+status: experimental
+description: >
+  Detects execution of the named dropper/loader scripts used in the Trigram
+  campaign's ClickFix clipboard-hijack stage on macOS/Linux, which fetches a
+  portable Node.js runtime and the install_guard.js payload deploying the
+  OverLord infostealer.
+references:
+  - https://securityonline.info/trigram-campaign-north-korea-clickfix
+  - https://www.stormshield.com/news/cti-trigram-campaign/
+author: MILO
+date: 2026-11-17
+tags:
+  - attack.execution
+  - attack.t1204.001
+  - attack.t1059.004
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection:
+    CommandLine|contains:
+      - 'verify_m'
+      - 'install_guard.js'
+  condition: selection
+falsepositives:
+  - "install_guard.js is a generic-sounding filename; verify execution context (recently-opened recruiting/conference/tracking site) before escalating."
+level: high

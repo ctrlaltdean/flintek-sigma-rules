@@ -1,0 +1,83 @@
+title: Trigram Campaign - DNS Queries to DPRK Infostealer Lure Domains
+id: bfa7ffd8-179b-4d41-bdbd-4c3b6899adc1
+status: experimental
+description: >
+  Detects DNS queries to lure domains used in the Trigram campaign (Stormshield,
+  Nov 2026), a DPRK-linked (Kimsuky/UNK_DeadDrop-correlated) operation impersonating
+  ~50 blockchain/AI/logistics brands via fake recruitment, conference, and package
+  tracking sites to deliver the OverLord infostealer via a ClickFix clipboard-hijack
+  technique.
+references:
+  - https://www.stormshield.com/news/cti-trigram-campaign/
+  - https://thehackernews.com/2026/11/trigram-campaign-impersonates-about-50.html
+  - https://securityonline.info/trigram-campaign-north-korea-clickfix
+author: MILO
+date: 2026-11-17
+tags:
+  - attack.initial-access
+  - attack.t1566.002
+  - attack.t1204.001
+  - attack.t1555
+logsource:
+  category: dns
+  product: windows
+detection:
+  selection_exact:
+    query:
+      - 'fuelcouncil.ink'
+      - 'mantle2council.xyz'
+      - 'mantlehires.xyz'
+      - 'lineacareers.xyz'
+      - 'ritualtalents.xyz'
+      - 'buildwithritual.xyz'
+      - 'buildwithmina.ink'
+      - 'joinmetis.site'
+      - 'joinwebflow.xyz'
+      - 'inv2boyaa.site'
+      - 'inv2initia.ink'
+      - 'ambercouncil.xyz'
+      - 'boytalents.xyz'
+      - 'joinnillion.xyz'
+      - 'seihires.xyz'
+      - 'bullishtalents.xyz'
+      - 'geoveral.space'
+      - 'lumenorbit.space'
+      - 'terraverro.space'
+      - 'albedorb.space'
+      - 'veriearth.space'
+      - 'swathely.space'
+      - 'nadirva.space'
+      - 'groundvy.space'
+      - 'icagllmbt.space'
+  selection_subdomain:
+    query|endswith:
+      - '.fuelcouncil.ink'
+      - '.mantle2council.xyz'
+      - '.mantlehires.xyz'
+      - '.lineacareers.xyz'
+      - '.ritualtalents.xyz'
+      - '.buildwithritual.xyz'
+      - '.buildwithmina.ink'
+      - '.joinmetis.site'
+      - '.joinwebflow.xyz'
+      - '.inv2boyaa.site'
+      - '.inv2initia.ink'
+      - '.ambercouncil.xyz'
+      - '.boytalents.xyz'
+      - '.joinnillion.xyz'
+      - '.seihires.xyz'
+      - '.bullishtalents.xyz'
+      - '.geoveral.space'
+      - '.lumenorbit.space'
+      - '.terraverro.space'
+      - '.albedorb.space'
+      - '.veriearth.space'
+      - '.swathely.space'
+      - '.nadirva.space'
+      - '.groundvy.space'
+      - '.icagllmbt.space'
+  condition: selection_exact or selection_subdomain
+falsepositives:
+  - None expected - these are attacker-registered disposable lookalike domains
+    with no legitimate use.
+level: high

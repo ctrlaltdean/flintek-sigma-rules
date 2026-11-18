@@ -1,0 +1,36 @@
+title: SCKit ScreenConnect Worm - Dropped Toolkit Files
+id: b8027cf7-cee2-4a62-b2c6-8c60d991f058
+status: experimental
+description: >
+  Detects creation of the named SCKit toolkit files used in the Nov 2026
+  ScreenConnect worm campaign for lateral spread, technician-session relay
+  (RelayTrap), and persistence.
+references:
+  - https://huntress.com/blog/sckit-worm-rogue-screenconnect
+  - https://cyberpress.org/sckit-worm-connectwise-screenconnect
+author: MILO
+date: 2026-11-17
+tags:
+  - attack.persistence
+  - attack.lateral-movement
+  - attack.t1072
+logsource:
+  category: file_event
+  product: windows
+detection:
+  selection_files:
+    TargetFilename|endswith:
+      - '\sc.msi'
+      - '\sckit-run.bat'
+      - '\sckit-decoder.ps1'
+      - '\TrapWatch.ps1'
+      - '\Panel-Lateral.ps1'
+      - '\Run-Lateral-Full.bat'
+      - '\runnew.cmd'
+      - '\ToolboxRelayUploader.exe'
+  selection_dir:
+    TargetFilename|contains: '\ProgramData\RelayTrap\'
+  condition: selection_files or selection_dir
+falsepositives:
+  - "sc.msi and sqlite3.exe style generic names could theoretically collide with unrelated software; the ProgramData RelayTrap directory and the sckit-/TrapWatch/Panel-Lateral filenames are campaign-specific and high confidence. Verify sc.msi hits against a legitimate ScreenConnect install source before escalating."
+level: high

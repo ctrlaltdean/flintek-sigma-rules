@@ -1,0 +1,43 @@
+title: Trigram Campaign - HTTP Requests to Operator Back Office Infrastructure
+id: a3442c40-9f73-4080-a46b-3f7936ec5a70
+status: experimental
+description: >
+  Detects outbound HTTP(S) requests to the Trigram campaign's back-office/C2
+  hosting IPs (rms-platform victim tracking console and decoy asset servers)
+  and the specific GitLab dead-drop repo path used to relay rotating C2 addresses
+  for the install_guard.js payload stage.
+references:
+  - https://www.stormshield.com/news/cti-trigram-campaign/
+  - https://osintsights.com/trigram-campaign-targets-ai-blockchain-devs-with-infostealers
+author: MILO
+date: 2026-11-17
+tags:
+  - attack.command-and-control
+  - attack.t1102.002
+  - attack.t1071.001
+logsource:
+  category: proxy
+detection:
+  selection_backoffice_ip:
+    c-ip:
+      - '170.205.30.27'
+      - '193.160.32.10'
+  selection_backoffice_port:
+    c-port:
+      - 8000
+      - 8080
+      - 8090
+  selection_deaddrop_path:
+    c-uri|contains: '/up-indexings/tasks'
+    dst_domain: 'gitlab.com'
+  condition: (selection_backoffice_ip and selection_backoffice_port) or selection_deaddrop_path
+falsepositives:
+  - selection_deaddrop_path can false-positive on legitimate automated clones
+    of this public GitLab repo (e.g. a security scanner archiving it) - triage
+    the requesting host's process/context before treating as confirmed compromise.
+  - selection_backoffice_ip/port have no known legitimate use - these IPs serve
+    only attacker back-office infrastructure per Stormshield's analysis. If your
+    proxy log lacks a c-port field, drop selection_backoffice_port and match on
+    IP alone, accepting the small risk of hitting unrelated services later
+    reusing the same IP after attacker infra is reclaimed.
+level: high

@@ -1,0 +1,32 @@
+title: SCKit ScreenConnect Worm - C2 Network Connections
+id: f9c60fa9-9a13-4241-880c-95202ecedf98
+status: experimental
+description: >
+  Detects outbound network connections to attacker-controlled ScreenConnect
+  panel/server infrastructure used in the Nov 2026 SCKit worm campaign, which
+  abused a blank-access-key flaw in the RMM+ ScreenConnect extension to push
+  rogue remote-access clients and a lateral-spread toolkit across MSP-managed
+  endpoints.
+references:
+  - https://huntress.com/blog/sckit-worm-rogue-screenconnect
+  - https://thehackernews.com/2026/11/screenconnect-attacks-target-at-least.html
+author: MILO
+date: 2026-11-17
+tags:
+  - attack.command-and-control
+  - attack.t1219
+  - attack.lateral-movement
+  - attack.t1021
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    DestinationIp:
+      - '185.99.255.28'
+      - '155.94.150.39'
+  condition: selection
+falsepositives:
+  - None expected - these IPs serve only attacker-controlled ScreenConnect
+    infrastructure per Huntress/ConnectWise advisories.
+level: high
