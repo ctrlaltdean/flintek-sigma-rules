@@ -1,0 +1,29 @@
+title: PHP2Shell Check Point Campaign - C2 Network Connection
+id: 40cac0ec-62b4-47cf-adc3-a933708a5878
+status: experimental
+description: Detects outbound/inbound connections to known PHP2Shell/TSGA campaign C2 IP infrastructure targeting Check Point Security Gateways (Oct 2026)
+references:
+    - https://research.checkpoint.com/2026/php2shell-exploitation-on-check-point-gateway/
+    - https://thehackernews.com/2026/11/hackers-exploit-php2shell-flaws-in.html
+author: MILO
+date: 2026-11-17
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - attack.command-and-control
+    - attack.t1071
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp:
+            - '130.94.19.204'
+            - '130.94.19.168'
+    # TSGA/TSProxy also listen on TCP 11072 and a unix socket /tmp/.p_sock on
+    # compromised gateways - flag any new listener/connection on this port.
+    selection_port:
+        DestinationPort: 11072
+    condition: selection or selection_port
+falsepositives:
+    - Port 11072 is non-standard but could theoretically be reused by unrelated internal software; verify against the IP indicator for higher confidence
+level: high

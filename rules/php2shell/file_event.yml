@@ -1,0 +1,33 @@
+title: PHP2Shell Check Point Campaign - Known Malware Hash Match (TSGA/TSProxy/Wiper)
+id: 14769fe9-a851-4be5-a367-a60376665083
+status: experimental
+description: Detects known file hashes for the TSGA backdoor, TSProxy library, PHP webshell, gogo scanner, destroy_v6 ESXi wiper, DREAM_ANNEXATION.txt note, and the related PhiliKit family (philistine, libdssafe.so) dropped after PHP2Shell exploitation of Check Point gateways
+references:
+    - https://research.checkpoint.com/2026/php2shell-exploitation-on-check-point-gateway/
+    - https://www.bleepingcomputer.com/news/security/check-point-gateways-hacked-via-php2shell-to-deploy-vmware-esxi-wiper/
+author: MILO
+date: 2026-11-17
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.impact
+    - attack.t1485
+logsource:
+    category: file_event
+detection:
+    # Every SHA-256 below is verified exactly 64 hex characters - do not trust
+    # a copy-paste without counting.
+    selection:
+        Hashes|contains:
+            - 'edb3e92eb7bda7413a09edcc4b1ba3cbed4bcdf42808a8abce63b6e4c3fda2b3'
+            - '4171b521fa6441382aa2fa014a08e18ff9a6e0ab6096c9144072bf46b37a2ec8'
+            - 'd7549671c7189979f0624ec52dad9ea6a707d23146e3585ab8f8c4720eca0c63'
+            - '3b51080a909023f7d484e2443740b572307ce0054eb9e32d98f0a06bfcd2db90'
+            - 'c7d9477309fac6c638a1128442056a242de086996add8cb49cd6496c36003237'
+            - '0522937c0c0337be54fe25493539e5f5f8ceb9742c980aaff1cfc9515f3a96f7'
+            - 'ee16e1695711b9d60c62925fcfb2fe1a29c18ae26565bc05410a14e16d2a39d7'
+            - 'fb1a6235eb6bce8c9ec8cd8bb85f17c9c2bde8ecb45b7a243a30ceadf26654da'
+    condition: selection
+falsepositives:
+    - None expected - these are attacker-authored binaries/tools
+level: critical

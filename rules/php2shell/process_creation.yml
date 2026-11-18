@@ -1,0 +1,35 @@
+title: PHP2Shell Check Point Campaign - TSGA Backdoor Process Launch
+id: f127bc3c-7789-4f7b-aa19-8c6b55dae599
+status: experimental
+description: Detects process launch/rename patterns associated with the TSGA backdoor (dropped as CPconfigdaemon, relaunched as slot_CPconfigdaemon) and the gogo internal reconnaissance scanner used post-exploitation of Check Point gateways via PHP2Shell
+references:
+    - https://research.checkpoint.com/2026/php2shell-exploitation-on-check-point-gateway/
+    - https://securityaffairs.com/202982/hacking/unpatched-check-point-gateways-are-being-wiped-exploiting-php2shell.html
+author: MILO
+date: 2026-11-17
+tags:
+    - attack.persistence
+    - attack.t1543
+    - attack.discovery
+    - attack.t1046
+logsource:
+    category: process_creation
+detection:
+    selection_tsga:
+        CommandLine|contains:
+            - 'CPconfigdaemon'
+            - 'slot_CPconfigdaemon'
+            - '/tmp/.bd.log'
+    selection_scanner:
+        Image|endswith:
+            - '/gogo'
+        CommandLine|contains:
+            - 'gogo'
+    selection_wiper:
+        CommandLine|contains:
+            - 'destroy_v6'
+            - 'DREAM_ANNEXATION.txt'
+    condition: selection_tsga or selection_scanner or selection_wiper
+falsepositives:
+    - None expected on Check Point Gaia appliances - these binary/file names are not legitimate appliance components
+level: critical

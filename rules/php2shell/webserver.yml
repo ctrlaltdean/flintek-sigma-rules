@@ -1,0 +1,31 @@
+title: PHP2Shell Exploitation Attempt - Mobile Access Portal / session.upload_progress Abuse
+id: 249be307-8f76-4c27-a9e2-16e00c702631
+status: experimental
+description: Detects artifacts of PHP2Shell (CVE-2026-109618/CVE-2026-109619) exploitation attempts against PHP-based web management interfaces, including Check Point Mobile Access portals, via the upload_progress_pwn session marker and malicious zz*.tpl webshells dropped into template directories
+references:
+    - https://research.checkpoint.com/2026/php2shell-exploitation-on-check-point-gateway/
+    - https://www.bleepingcomputer.com/news/security/php2shell-security-flaws-now-sucessfully-exploited-in-the-wild
+    - https://thehackernews.com/2026/10/php2shell-attack-roots-25-servers-breaches-us-government-affiliated-network.html
+author: MILO
+date: 2026-11-17
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - attack.persistence
+    - attack.t1505.003
+logsource:
+    category: webserver
+detection:
+    # upload_progress_pwn marker found in PHP session artifacts (e.g. under
+    # /opt/CPcvpn-R81.20/tmp/) is a direct PHP2Shell exploitation indicator.
+    selection_session_marker:
+        FileName|contains: 'upload_progress_pwn'
+    # Webshells dropped with names starting zz and ending .tpl into the
+    # Mobile Access portal template directory.
+    selection_webshell_name:
+        FileName|startswith: 'zz'
+        FileName|endswith: '.tpl'
+    condition: selection_session_marker or selection_webshell_name
+falsepositives:
+    - selection_webshell_name alone could match legitimate custom template files starting with 'zz'; combine with file creation time and portal directory context before alerting at high severity
+level: high
