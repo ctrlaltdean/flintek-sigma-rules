@@ -1,0 +1,37 @@
+title: AOMEI Backupper Supply Chain (UNC7017) - Malicious Update Package Download
+id: 4a67f78e-69bd-4008-9b03-83bad6a5c3af
+status: experimental
+description: |
+    Detects HTTP(S) requests for the specific URLs/paths UNC7017 used to serve trojanized
+    AOMEI Backupper "update" and "promotional" packages during the Apr-Jul 2026 short-burst
+    tampering windows, including the Google Cloud Storage bucket abused on 20 July 2026 to
+    split delivery away from actor-registered domains.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering
+    - https://thehackernews.com/2026/10/attackers-tampered-with-aomei.html
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1195.002
+    - attack.t1071.001
+logsource:
+    category: proxy
+detection:
+    selection_host:
+        c-uri|contains:
+            - 'promotion.storage-data.com/download/abpopup/upgrade-now.zip'
+            - 'promotion.storage-data.com/config/component.zip'
+            - 'promotion.storage-data.com/config/en.zip'
+            - 'promotion.storage-data.com/config/whitelist.ini'
+    selection_gcs:
+        c-uri|contains:
+            - 'storage.googleapis.com/aomeiupdate/upgrade-now.zip'
+            - 'storage.googleapis.com/aomeiupdate/component.zip'
+    condition: selection_host or selection_gcs
+falsepositives:
+    - selection_gcs sits on a legitimate, shared Google Cloud Storage endpoint
+      (storage.googleapis.com); only the specific aomeiupdate bucket path is malicious here.
+      Do not block storage.googleapis.com broadly - alert only on the exact object paths.
+    - storage-data.com paths have no known legitimate use.
+level: high

@@ -1,0 +1,53 @@
+title: AOMEI Backupper Supply Chain (UNC7017) - Known CROSSROAD/SHINYROAD/ADAPTAGENT File Hashes
+id: f5f3eab8-8c2f-40c1-b99c-5dc6651de201
+status: experimental
+description: |
+    Detects known-bad files from the AOMEI Backupper update-server tampering campaign:
+    the CROSSROAD downloader (upgrade-now.exe / upgrade-now.zip), the SHINYROAD backdoor
+    loader DLL and payload archive, and the ADAPTAGENT (Adaptix C2) launcher used for
+    post-exploitation in July 2026. One hash (ADAPTAGENT launcher, NitroPromotion.exe) is
+    directly confirmed in Google/Mandiant's own published YARA rule reference value; the
+    remainder are drawn from independent third-party IOC compilations of the GTIG/Mandiant
+    and ManageEngine reports and were not independently re-verified against the vendors'
+    (paywalled) VirusTotal IOC collection - treat as reported, not independently confirmed,
+    and re-validate hashes before relying on them for blocking.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering
+    - https://www.manageengine.com/threat-analysis-lab/aomei-backupper-supply-chain-compromise.html
+    - https://slapopotamus.github.io/HuntPack/hunts/AOMEI-Backupper-UNC7017-ShinyRoad-Hunt.html
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.resource-development
+    - attack.t1588.001
+    - attack.execution
+    - attack.t1204
+logsource:
+    category: file_event
+    product: windows
+    definition: Requires hash-enriched file events with SHA-256 values mapped to Hashes; standard Sysmon Event ID 11 does not provide file hashes.
+detection:
+    selection:
+        Hashes|contains:
+            # CROSSROAD downloader / archive (upgrade-now.exe, upgrade-now.zip, multiple builds)
+            - '6670ab3f0434a42f33416f8354150b1701e7615f3cfa2f1635e54f8df0f6eec7'
+            - '11e576df44e9c9eef72b9f5b699291bcdb200a19130778ec231e5b0987b913ad'
+            - '130c3970f1c900191615b99d8be522d6a488a3d3b73938896ed937092007d96a'
+            - '9a58e8f49edf5644e5728f74cf36f560d3d486fa51db4db69d927963c7aca450'
+            - 'b360b6db0c2b668317edc1504a7c39ef047f0d925c8f113b521f6724c157ae21'
+            - '9ed503c6a9a3a493fb859401e9ed469eed77ab9927341964d6dbfbfa6255aeba'
+            # SHINYROAD package / loader DLL / implant DLL / encrypted payload
+            - 'd167bc898e856da8a4003cb4dfc7de55fea109eee3cd64fc8999710314109464'
+            - '5837bc26a73cfb46ffd466cf889f03ce2f6a48f1f3fd42ec8be22189d51cab1e'
+            - '8fbaa74b27dc1e89abfc694e834378746f0ad37a688098c5f8f511410157c8b8'
+            - '4c0a75e0f62ddc0bb350c224fe996f3b2ab08dcb0d288231c61ffe9406c7045b'
+            - '4b4d25b3501519476f9a62a88a781e4f446f669280eb5e98c6b96eb6d3743431'
+            # ADAPTAGENT (Adaptix C2) launcher - directly confirmed via GTIG's own published YARA ref
+            - '14b31918075e6130b9123158743db0a81e2d7bfcf6d39731ee7d9200a98cd591'
+            - '8c8090aca8ddb1cf968d2b810457e0cfce97c03cd721f70d2eca7f37f2681fc4'
+    condition: selection
+falsepositives:
+    - Low - these are claimed to be specific malicious file hashes. False positives would
+      only occur from a hash-list transcription error upstream; re-verify against your own
+      malware repository or VirusTotal before treating a hit as ground truth.
+level: critical

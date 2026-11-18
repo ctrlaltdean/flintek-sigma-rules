@@ -1,0 +1,34 @@
+title: AOMEI Backupper Supply Chain (UNC7017) - Malicious Infrastructure DNS Query
+id: 7b3deb49-fd55-40eb-8427-1fa203f08ec6
+status: experimental
+description: |
+    Detects DNS resolution of attacker-registered, vendor-themed domains used to stage and
+    deliver the CROSSROAD downloader / SHINYROAD backdoor during the AOMEI Backupper
+    update-server tampering campaign (UNC7017, Apr-Jul 2026). storage-data.com and its
+    subdomains were dedicated actor infrastructure stood up in July 2026; the Alibaba OSS
+    hostname was used for early-stage (Apr-May 2026) payload staging.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering
+    - https://www.bleepingcomputer.com/news/security/hackers-hijack-aomei-update-servers-to-secretly-spread-malware/
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+    - attack.t1568
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection:
+        QueryName|endswith:
+            - '.storage-data.com'
+            - 'storage-data.com'
+    condition: selection
+falsepositives:
+    - None expected for storage-data.com - domain has no known legitimate use.
+    - serv.oss-cn-hongkong.aliyuncs.com is a shared Alibaba Cloud Object Storage hostname and
+      is intentionally NOT included as a standalone selector here (too broad for direct
+      blocking); hunt it only in combination with a nearby AOMEI update-check event or the
+      upgrade-now.exe/.zip filenames in rules/aomei-backupper-unc7017/filehash.yml.
+level: high

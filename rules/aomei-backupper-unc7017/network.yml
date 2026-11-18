@@ -1,0 +1,41 @@
+title: AOMEI Backupper Supply Chain (UNC7017) - C2 Network Connection
+id: 1a4053b3-6de7-4ef6-94df-5aff34531980
+status: experimental
+description: |
+    Detects outbound connections to command-and-control infrastructure used by UNC7017
+    in the AOMEI Backupper update-server supply chain compromise (Apr-Jul 2026). SHINYROAD
+    backdoor C2 ran on 8.218.65.184 (TCP 41397 and 443); 8.210.84.56 was used both as a
+    WebDAV NTLM-coercion target and for ADAPTAGENT/Adaptix C2 beaconing on TCP 6800;
+    47.239.60.117 was secondary staging infrastructure.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering
+    - https://www.bleepingcomputer.com/news/security/hackers-hijack-aomei-update-servers-to-secretly-spread-malware/
+    - https://www.securityweek.com/aomei-backupper-compromised-in-short-burst-supply-chain-campaign/
+    - https://thehackernews.com/2026/10/attackers-tampered-with-aomei.html
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - attack.t1105
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection_ip:
+        DestinationIp:
+            - '8.218.65.184'
+            - '8.210.84.56'
+            - '47.239.60.117'
+    selection_port:
+        DestinationPort:
+            - 41397
+            - 6800
+    condition: selection_ip or selection_port
+falsepositives:
+    - DestinationPort alone (41397, 6800) is not unique to this campaign - prefer the IP-based
+      selection for high-confidence alerting; use the port selection only as a low-confidence
+      hunting lead.
+    - Alibaba Cloud / shared hosting IP space could theoretically be reassigned over time;
+      confirm IOCs are still live before hard-blocking.
+level: high

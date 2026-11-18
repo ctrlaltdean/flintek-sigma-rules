@@ -1,0 +1,48 @@
+title: AOMEI Backupper Supply Chain (UNC7017) - CROSSROAD Persistence and Execution Chain
+id: 2607e2f1-3d09-461a-b0c2-2f3f9cdb2f34
+status: experimental
+description: |
+    Detects behavioral artifacts of the CROSSROAD downloader / SHINYROAD backdoor execution
+    chain delivered through tampered AOMEI Backupper update/notification configs: an unsigned
+    "upgrade-now.exe" spawned from an AOMEI process tree, and scheduled-task persistence named
+    RadminComponentRuntime (CROSSROAD/SHINYROAD, re-launches Radmin+sideloaded DLL every 3h) or
+    NitroRuntime (ADAPTAGENT/Adaptix C2, disguised as Nitro PDF).
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering
+    - https://www.manageengine.com/threat-analysis-lab/aomei-backupper-supply-chain-compromise.html
+    - https://thehackernews.com/2026/10/attackers-tampered-with-aomei.html
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.persistence
+    - attack.t1053.005
+    - attack.defense-evasion
+    - attack.t1574.002
+    - attack.initial-access
+    - attack.t1195.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith:
+            - '\Backupper.exe'
+            - '\ABNotify.exe'
+            - '\ABService.exe'
+        Image|endswith: '\upgrade-now.exe'
+    selection_task_create:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains: '/create'
+    selection_task_name:
+        CommandLine|contains:
+            - 'RadminComponentRuntime'
+            - 'NitroRuntime'
+    condition: selection_parent or (selection_task_create and selection_task_name)
+falsepositives:
+    - selection_parent is narrow (unsigned upgrade-now.exe launched directly by an AOMEI
+      process) and should have very low false-positive volume in legitimate environments.
+    - selection_task_create and selection_task_name together target specific, attacker-chosen
+      task names not expected to occur legitimately; a generic schtasks.exe /create alone
+      (without the task-name match) is common and NOT alertable on its own - do not split
+      the condition.
+level: high
