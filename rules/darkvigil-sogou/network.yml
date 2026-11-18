@@ -1,0 +1,30 @@
+title: SlippyNunchucks DarkVigil - C2/Staging Network Connection (Sogou Hijack)
+id: edda4357-41ec-403e-86fa-697af73e1e47
+status: experimental
+description: |
+    Detects outbound connections to IP addresses used as DNS-hijacking
+    staging servers (impersonating Sogou's config.pinyin.sogou.com) or as
+    DarkVigil bootstrap/C2 infrastructure in the SlippyNunchucks campaign.
+    All four IPs are hosted on Alibaba (US) Technology Co., Ltd.
+references:
+    - https://www.welivesecurity.com/en/eset-research/slippynunchucks-hijacks-sogou-input-methods-brand-promotion-mechanism-to-distribute-malware/
+    - https://github.com/eset/malware-ioc/tree/master/slippynunchucks
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071
+    - attack.t1584.004
+detection:
+    selection:
+        DestinationIp:
+            - '47.86.15.162'
+            - '47.236.254.159'
+            - '47.237.122.175'
+            - '47.239.250.102'
+    condition: selection
+falsepositives:
+    - Shared Alibaba Cloud IP space could theoretically host unrelated services later if these IPs are reassigned after takedown; verify current attribution before hard-blocking long after the First-seen dates below (2026-06-07 to 2026-08-08)
+level: high
+logsource:
+    category: network_connection

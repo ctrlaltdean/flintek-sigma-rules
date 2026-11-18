@@ -1,0 +1,38 @@
+title: SlippyNunchucks DarkVigil - Sogou Brand-Promotion Config Request Over Plain HTTP
+id: 9d7c82c0-8340-4aab-9ee4-105a04c39e48
+status: experimental
+description: |
+    Detects the specific, legitimate Sogou Input Method request path
+    (getBrandScd.php, the SGTool.exe branded-vocabulary "config" fetch abused
+    in the SlippyNunchucks DNS-hijacking campaign) when it travels over
+    cleartext HTTP. This endpoint is legitimate Sogou infrastructure when
+    resolved correctly and reached over HTTPS; it only becomes exploitable
+    when (a) still sent as plaintext HTTP, which SlippyNunchucks' hijack
+    depended on, and (b) the destination IP does not match Sogou's own
+    hosting. Use as a hunt/monitoring rule to confirm clients have patched
+    to Sogou Input Method 16.10+ (HTTPS + cert pinning), not as a pure
+    malicious-traffic signature - cleartext use alone, on an unpatched
+    client resolving the real Sogou IP, is not itself malicious.
+references:
+    - https://www.welivesecurity.com/en/eset-research/slippynunchucks-hijacks-sogou-input-methods-brand-promotion-mechanism-to-distribute-malware/
+    - https://infrastack.ai/live/CVE-2026-120422
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - attack.t1557
+detection:
+    selection:
+        c-uri|contains: 'getBrandScd.php'
+        http.request.method: 'GET'
+    filter_tls:
+        # Exclude when the proxy log itself indicates TLS was used; adjust
+        # field to your proxy schema (this rule targets cleartext HTTP only).
+        dest_port: 443
+    condition: selection and not filter_tls
+falsepositives:
+    - Any unpatched (pre-16.10) Sogou Input Method client making this request legitimately over HTTP to the real Sogou-owned IP is a false positive for maliciousness, but a true positive for "still vulnerable, needs patching" - do not treat a hit alone as compromise confirmation. config.pinyin.sogou[.]com is Sogou/Tencent's own legitimate hostname and is NOT an indicator of compromise; only hijacked resolutions to the IPs in network.yml (or domains in dns.yml) indicate the attack.
+level: medium
+logsource:
+    category: proxy

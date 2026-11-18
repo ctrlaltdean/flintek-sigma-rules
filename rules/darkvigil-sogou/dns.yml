@@ -1,0 +1,42 @@
+title: SlippyNunchucks DarkVigil - Malicious DNS Query (Sogou Hijack)
+id: 78bddfff-f9e4-43e2-83c2-5437149b8d2e
+status: experimental
+description: |
+    Detects DNS queries to domains used by the China-aligned SlippyNunchucks
+    group in its DNS-hijacking campaign against Sogou Input Method
+    (SGTool.exe), used to stage and bootstrap the DarkVigil (FDMTP) backdoor.
+    Includes both the lookalike hijacking/staging domains (sogou-cdn[.]com,
+    dev.soft-png-cdn[.]com) and DarkVigil's own bootstrap/C2 domains.
+references:
+    - https://www.welivesecurity.com/en/eset-research/slippynunchucks-hijacks-sogou-input-methods-brand-promotion-mechanism-to-distribute-malware/
+    - https://github.com/eset/malware-ioc/tree/master/slippynunchucks
+    - https://thehackernews.com/2026/11/china-aligned-hackers-hijack-sogou.html
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+    - attack.t1584.001
+detection:
+    # Exact match for the bare domain, |endswith for subdomains - never a bare
+    # |contains on a domain string (matches substrings in unrelated domains).
+    selection_exact:
+        query:
+            - 'sogou-cdn.com'
+            - 'dev.soft-png-cdn.com'
+            - 'blog.wangmengfun.top'
+            - 'update.mssproxy.net'
+            - 'img.fusfun.top'
+    selection_subdomain:
+        query|endswith:
+            - '.sogou-cdn.com'
+            - '.dev.soft-png-cdn.com'
+            - '.blog.wangmengfun.top'
+            - '.update.mssproxy.net'
+            - '.img.fusfun.top'
+    condition: selection_exact or selection_subdomain
+falsepositives:
+    - None expected - these are attacker-registered lookalike/bootstrap domains, not shared/legitimate infrastructure
+level: critical
+logsource:
+    category: dns

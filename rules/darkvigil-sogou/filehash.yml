@@ -1,0 +1,39 @@
+title: SlippyNunchucks DarkVigil Implant - Known File Hash Match
+id: 50334898-6130-48c0-9029-a60249f0c22f
+status: experimental
+description: |
+    Detects known DarkVigil (FDMTP) implant files dropped via the SlippyNunchucks
+    Sogou Input Method DNS-hijacking campaign: a malicious libcef.dll side-loaded
+    by a renamed, signed Adobe licensing helper, and a malicious .NET DLL disguised
+    as a Visual Studio hosting-process utility. Both are placed in the Sogou
+    Components folder where Sogou's own component workflow executes them.
+references:
+    - https://www.welivesecurity.com/en/eset-research/slippynunchucks-hijacks-sogou-input-methods-brand-promotion-mechanism-to-distribute-malware/
+    - https://github.com/eset/malware-ioc/tree/master/slippynunchucks
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.defense-evasion
+    - attack.t1574.002
+    - attack.t1036.005
+detection:
+    # Every hash below verified as the correct length for its algorithm
+    # (SHA-256 = 64 hex chars, SHA-1 = 40, MD5 = 32) - counted, not eyeballed.
+    selection_sha256:
+        Hashes|contains:
+            - '7e628dd33aa09877bdda13606de11978743d09e0a3ea4a51dbd7cbd4b0ae8fb6'
+            - 'fa9e3d0112fede8d31bbf759979fde3f9db48576c69e0e8ed4b5d6f9323fcec8'
+    selection_sha1:
+        Hashes|contains:
+            - '8a60a8e90e1f5f08f28fe5a6dd57bd686c20dc23'
+            - '3e16ba611782af6e45576d390488d28fd676bade'
+    selection_filename:
+        TargetFilename|endswith:
+            - '\libcef.dll'
+            - '\Microsoft.VisualStudio.HostingProcess.Utilities.Sync.dll'
+    condition: selection_sha256 or selection_sha1 or selection_filename
+falsepositives:
+    - selection_filename alone will false-positive on legitimate libcef.dll (Chromium Embedded Framework) and genuine Visual Studio tooling files of the same name elsewhere on disk - treat filename match as a weak signal requiring hash corroboration or path review (expected path is the Sogou Components folder, not a Visual Studio or CEF install directory); hash-based selections have no expected false positives
+level: critical
+logsource:
+    category: file_event
