@@ -1,0 +1,36 @@
+title: LiteLLM TeamPCP Supply Chain (Mar 2026) - C2 Network Connection
+id: 212a1a8b-b9c3-4f57-8227-f44a351f3722
+status: experimental
+description: |
+    Detects outbound connections to C2 team-server infrastructure (AdaptixC2 and
+    Havoc frameworks) associated with the March 2026 LiteLLM (litellm==1.82.7/1.82.8)
+    PyPI supply chain compromise. A systemd service masquerading as "System
+    Telemetry Service" polled checkmarx.zone roughly every 50 minutes for payload
+    URLs that resolved to this infrastructure.
+    46.151.182.203 is included with lower confidence: it was identified via a
+    single source (Hunt.io certificate pivoting from the exfiltration domain,
+    48h online window) and is not independently corroborated elsewhere at time
+    of writing.
+references:
+    - https://hunt.io/blog/33k-exposed-litellm-teampcp-c2-supply-chain-attack
+    - https://www.endorlabs.com/learn/teampcp-isnt-done
+author: Vance (CTI)
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071
+    - attack.t1105
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp:
+            - '83.142.209.11'
+            - '45.148.10.212'
+    selection_single_source_lower_confidence:
+        DestinationIp: '46.151.182.203'
+    condition: selection or selection_single_source_lower_confidence
+falsepositives:
+    - Shared cloud/VPS IP space could theoretically host unrelated services later; low probability given the narrow IOC scope and short window these hosts were observed active.
+    - 46.151.182.203 (selection_single_source_lower_confidence) comes from one report only - corroborate with a host-side artifact (see file_event.yml in this folder) before treating a hit as confirmed.
+level: high

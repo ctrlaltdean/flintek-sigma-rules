@@ -1,0 +1,32 @@
+title: LiteLLM cook/sitecustomize Supply Chain (Oct 2026) - PRIVCOLLECT Environment Marker
+id: 8cde7235-b883-40ac-aebd-e663c20856f8
+status: experimental
+description: |
+    Detects processes carrying the PRIVCOLLECT_ACTIVE=1 environment variable,
+    set by the "cook"/"privcollect" credential stealer from the October 21,
+    2026 litellm==1.107.0 supply chain compromise to suppress duplicate
+    collection runs across child/related processes. Requires a log source that
+    captures process environment variables at creation (e.g. many commercial
+    EDR process-creation schemas); default Sysmon process_creation events do
+    NOT capture environment variables, so this rule will not fire against
+    plain Sysmon telemetry without an added environment-capture config or a
+    different EDR backend - validate field availability against your own
+    schema before relying on this rule (see repo README).
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/23/inside-the-litellm-1-107-0-supply-chain-compromise-credential-theft-through-python-startup-hooks/
+    - https://opensourcemalware.com/blog/litellm-1-107-0-pypi-wheel-contains-a-credential-stealer-and-persistent-python-backdoor
+author: Vance (CTI)
+date: 2026-11-18
+tags:
+    - attack.defense-evasion
+    - attack.credential-access
+    - attack.t1552
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Environment|contains: 'PRIVCOLLECT_ACTIVE=1'
+    condition: selection
+falsepositives:
+    - None expected - this is an attacker-defined sentinel variable name, not used by any known legitimate software.
+level: critical

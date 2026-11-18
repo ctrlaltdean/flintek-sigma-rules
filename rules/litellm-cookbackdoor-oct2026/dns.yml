@@ -1,0 +1,34 @@
+title: LiteLLM cook/sitecustomize Supply Chain (Oct 2026) - Malicious Exfil Domain DNS Query
+id: 8bff1a50-5627-4fb4-9194-55d7fcef75e8
+status: experimental
+description: |
+    Detects DNS queries to litellm[.]dev, the attacker-registered domain
+    (registered 2026-10-13, ~1 week before the attack) used as the hard-coded
+    credential-exfiltration receiver in the October 21, 2026 litellm==1.107.0
+    PyPI/Docker/GHCR supply chain compromise. This is a lookalike domain and is
+    NOT the legitimate LiteLLM project domain (litellm.ai) - do not confuse the
+    two or block litellm.ai.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/23/inside-the-litellm-1-107-0-supply-chain-compromise-credential-theft-through-python-startup-hooks/
+    - https://www.chainguard.dev/fr-FR/unchained/litellm-attacked-again-malicious-1-107-0-wheels-on-pypi-and-docker-hub-october-2026
+    - https://opensourcemalware.com/blog/litellm-1-107-0-pypi-wheel-contains-a-credential-stealer-and-persistent-python-backdoor
+author: Vance (CTI)
+date: 2026-11-18
+tags:
+    - attack.exfiltration
+    - attack.command-and-control
+    - attack.t1041
+    - attack.t1071.001
+    - attack.t1195.002
+logsource:
+    category: dns
+detection:
+    selection_exact:
+        query: 'litellm.dev'
+    selection_subdomain:
+        query|endswith: '.litellm.dev'
+    condition: selection_exact or selection_subdomain
+falsepositives:
+    - None expected - domain was registered specifically for this campaign a week before use.
+    - Do not confuse with the legitimate litellm.ai domain (note the different TLD) - never add litellm.ai to a blocklist derived from this rule.
+level: critical

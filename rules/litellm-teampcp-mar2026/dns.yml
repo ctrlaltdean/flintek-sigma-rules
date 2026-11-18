@@ -1,0 +1,41 @@
+title: LiteLLM TeamPCP Supply Chain (Mar 2026) - Malicious C2/Exfil Domain DNS Query
+id: 03ef09bd-1558-448b-8d50-3e595f3192e5
+status: experimental
+description: |
+    Detects DNS queries to attacker-controlled domains used in the March 24, 2026
+    LiteLLM (litellm==1.82.7 / litellm==1.82.8) PyPI supply chain compromise,
+    attributed with "reportedly" confidence by CERT-EU to TeamPCP. models.litellm.cloud
+    was the credential-exfiltration endpoint; checkmarx.zone served further payloads
+    to the persistence mechanism. LiteLLM's own advisory states explicitly that
+    neither domain is affiliated with the real LiteLLM/BerriAI project (litellm.ai)
+    or the real Checkmarx vendor (checkmarx.com) - do not confuse them.
+references:
+    - https://docs.litellm.ai/blog/security-update-march-2026
+    - https://github.com/pypa/advisory-database/blob/main/vulns/litellm/PYSEC-2026-2.yaml
+    - https://github.com/advisories/GHSA-5mg7-485q-xm76
+author: Vance (CTI)
+date: 2026-11-18
+tags:
+    - attack.exfiltration
+    - attack.command-and-control
+    - attack.t1041
+    - attack.t1071.004
+    - attack.t1195.002
+logsource:
+    category: dns
+detection:
+    # Exact match for the bare domains, |endswith for subdomains - never a bare
+    # |contains on a domain string.
+    selection_exact:
+        query:
+            - 'models.litellm.cloud'
+            - 'checkmarx.zone'
+    selection_subdomain:
+        query|endswith:
+            - '.models.litellm.cloud'
+            - '.checkmarx.zone'
+    condition: selection_exact or selection_subdomain
+falsepositives:
+    - None expected for models.litellm.cloud - it is attacker-registered infrastructure, not LiteLLM infrastructure, per LiteLLM's own advisory.
+    - checkmarx.zone is attacker-registered infrastructure that impersonates the Checkmarx brand. It is unrelated to the legitimate checkmarx.com domain; do not add checkmarx.com to any blocklist derived from this rule.
+level: critical

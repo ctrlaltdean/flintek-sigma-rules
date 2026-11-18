@@ -1,0 +1,57 @@
+title: LiteLLM TeamPCP Supply Chain (Mar 2026) - Malicious File / Hash Match
+id: e6e516d5-abf2-4a72-bd1c-e4de6e7ee1bc
+status: experimental
+description: |
+    Detects filesystem artifacts from the March 2026 litellm==1.82.7/1.82.8 PyPI
+    supply chain compromise: the litellm_init.pth Python startup hook (1.82.8
+    only; T1546.018), the "System Telemetry Service" systemd persistence unit,
+    and RAT staging/exfiltration files.
+    Hash values below are RISK-RATED LOWER CONFIDENCE than the path/domain IOCs
+    in this campaign: LiteLLM's own advisory, the GitHub Security Advisory
+    (GHSA-5mg7-485q-xm76), and the PyPA advisory (PYSEC-2026-2) - all primary
+    sources - do not publish hashes for the malicious artifacts. The values here
+    come from secondary aggregators (Hunt.io; Endor Labs, also reproduced in a
+    UAE Cyber Security Council advisory) and could not be cross-checked against
+    a primary source. Other secondary sources (e.g. a Forcepoint blog giving
+    SHA-1-length values, a different regional advisory giving yet another set
+    of SHA-256 values) give conflicting hash values for what is claimed to be
+    the same artifact; those conflicting values are deliberately NOT included
+    here. Treat the hash selection as reported-but-unconfirmed and prioritize
+    the path-based selection for triage.
+references:
+    - https://docs.litellm.ai/blog/security-update-march-2026
+    - https://github.com/pypa/advisory-database/blob/main/vulns/litellm/PYSEC-2026-2.yaml
+    - https://hunt.io/blog/33k-exposed-litellm-teampcp-c2-supply-chain-attack
+    - https://www.endorlabs.com/learn/teampcp-isnt-done
+author: Vance (CTI)
+date: 2026-11-18
+tags:
+    - attack.persistence
+    - attack.t1546.018
+    - attack.t1543.002
+    - attack.credential-access
+logsource:
+    category: file_event
+detection:
+    selection_paths:
+        TargetFilename|contains:
+            - 'litellm_init.pth'
+            - '.config/sysmon/sysmon.py'
+            - '.config/systemd/user/sysmon.service'
+            - '/tmp/pglog'
+            - '/tmp/.pg_state'
+            - '/tmp/tpcp.tar.gz'
+    # Every SHA-256 below MUST be exactly 64 hex chars - verified by character
+    # count before publishing, not eyeballed from the source articles.
+    selection_hashes_lower_confidence:
+        Hashes|contains:
+            - '71e35aef03099cd1f2d6446734273025a163597de93912df321ef118bf135238'
+            - '8395c3268d5c5dbae1c7c6d4bb3c318c752ba4608cfcd90eb97ffb94a910eac2'
+            - 'd2a0d5f564628773b6af7b9c11f6b86531a875bd2d186d7081ab62748a800ebb'
+            - 'a0d229be8efcb2f9135e2ad55ba275b76ddcfeb55fa4370e0a522a5bdee0120b'
+    condition: selection_paths or selection_hashes_lower_confidence
+falsepositives:
+    - "~/.config/sysmon/sysmon.py and the sysmon.service unit deliberately imitate a telemetry/monitoring tool name; this is NOT the legitimate Microsoft Sysinternals Sysmon (which does not install there) but analysts should double check the full path and binary before treating a hit on the bare string 'sysmon' elsewhere as this campaign."
+    - "litellm_init.pth, pglog, .pg_state, and tpcp.tar.gz are not legitimate filenames in any known software; low false-positive risk."
+    - "Hash selection: see description - secondary-sourced only, verify independently before action."
+level: critical

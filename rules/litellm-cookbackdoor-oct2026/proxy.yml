@@ -1,0 +1,49 @@
+title: LiteLLM cook/sitecustomize Supply Chain (Oct 2026) - C2/Exfil HTTP Request
+id: caf569fd-1e22-477f-ba79-8d3365b45612
+status: experimental
+description: |
+    Detects HTTP request patterns from the October 21, 2026 litellm==1.107.0
+    compromise: the exfiltration POST path on the attacker domain, the GitHub
+    dead-drop used to fetch the live second-stage C2 address (account/repo
+    deleted Oct 21, was empty when researchers checked), the second-stage
+    retrieval path, and the static auth header the stealer sends with every
+    upload.
+    Note raw.githubusercontent.com is legitimate GitHub infrastructure abused
+    as a dead-drop - do not block the domain itself, only the specific path
+    selection below.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/23/inside-the-litellm-1-107-0-supply-chain-compromise-credential-theft-through-python-startup-hooks/
+    - https://opensourcemalware.com/blog/litellm-1-107-0-pypi-wheel-contains-a-credential-stealer-and-persistent-python-backdoor
+    - https://www.chainguard.dev/fr-FR/unchained/litellm-attacked-again-malicious-1-107-0-wheels-on-pypi-and-docker-hub-october-2026
+author: Vance (CTI)
+date: 2026-11-18
+tags:
+    - attack.exfiltration
+    - attack.command-and-control
+    - attack.t1041
+    - attack.t1071.001
+logsource:
+    category: proxy
+detection:
+    # Anchored with |startswith on the full scheme+host so this cannot match
+    # a lookalike like 'evil-litellm.dev' or 'evil-raw.githubusercontent.com'
+    # the way a bare |contains on the bare string would (Codex review caught
+    # this - the original draft used an unanchored |contains here).
+    selection_exfil_path:
+        c-uri|startswith:
+            - 'http://www.litellm.dev/healthcheck'
+            - 'https://www.litellm.dev/healthcheck'
+    selection_deaddrop:
+        c-uri|startswith:
+            - 'http://raw.githubusercontent.com/letters9813/pythonclient-test'
+            - 'https://raw.githubusercontent.com/letters9813/pythonclient-test'
+    selection_second_stage_path:
+        c-uri|endswith: '/codepy'
+    selection_token_header:
+        http_header|contains: 'X-Token: XWiA8gZNa7NcX2XRoAEb'
+    condition: 1 of selection_*
+falsepositives:
+    - selection_second_stage_path ('/codepy') is a generic-looking URL path on its own. Treat an isolated match with lower confidence than the other selections and corroborate with a host-side artifact (see file_event.yml / process_creation.yml in this folder) before declaring compromise; the dead-drop file was reported empty, so this path may never have been contacted by the live campaign.
+    - selection_token_header value is campaign-specific and static; no false positives expected.
+    - selection_deaddrop targets one specific now-deleted GitHub path, not the raw.githubusercontent.com domain broadly.
+level: high
