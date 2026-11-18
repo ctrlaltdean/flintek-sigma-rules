@@ -1,0 +1,49 @@
+title: Rank Math PRO Supply Chain - Rogue Admin, Malicious Options and Cron Indicators
+id: cef76286-30d5-4819-ab7b-dc5b99e139f2
+status: experimental
+description: |
+    Detects WordPress application/database-level indicators of the Rank Math
+    PRO v3.0.123 supply chain backdoor (CVE-2026-111862): unauthorized
+    administrator accounts, three malicious wp_options entries the vendor
+    identified by name, and a tagged cron job used for persistence. This
+    logsource is non-standard - field names (UserName/UserEmail/OptionName/
+    CommandLine) must be mapped to whatever actually emits these events in
+    your environment (a WP security/audit-log plugin exporting to syslog/SIEM,
+    a DB-activity monitor for wp_options, or host-level cron/auditd logging
+    for the crontab marker). Treat as a detection-logic sketch to adapt, not
+    a drop-in rule for a specific product.
+references:
+    - https://rankmath.com/kb/pro-3-0-123-security-incident/
+    - https://www.wordfence.com/blog/2026/10/rank-math-seo-pro-3-0-123-malware/
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.persistence
+    - attack.t1136.001
+    - attack.t1053.003
+    - attack.defense-evasion
+logsource:
+    category: application
+    product: wordpress
+detection:
+    selection_admin_user:
+        UserName|startswith: 'wpsupport_'
+    selection_admin_email:
+        UserEmail|endswith: '@wp-mail.net'
+    selection_options:
+        OptionName:
+            - '_uf6qdn2hmm'
+            - 't8krdk990phb'
+            - '_np5pvf754c'
+    selection_cron:
+        CommandLine|contains: '#ms6v46'
+    condition: selection_admin_user or selection_admin_email or selection_options or selection_cron
+falsepositives:
+    - >
+        selection_options and selection_cron: none expected - these are
+        vendor-reported, incident-specific strings with no legitimate use.
+    - >
+        selection_admin_user / selection_admin_email: low probability of
+        collision with a legitimate account, but verify - 'wpsupport_' as a
+        prefix and a '@wp-mail.net' email domain are not reserved strings.
+level: high

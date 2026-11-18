@@ -1,0 +1,40 @@
+title: Rank Math PRO Supply Chain - Backdoor File Artifacts
+id: c54a1ca4-c2b1-41cb-b1f5-ce648a521655
+status: experimental
+description: |
+    Detects filesystem artifacts dropped by the Rank Math PRO v3.0.123 supply
+    chain backdoor (CVE-2026-111862): a fake WordPress-core-named file that
+    does not ship with real WordPress core, and .cache files containing PHP
+    code under wp-content (made executable via injected .htaccess rules).
+    Adjust TargetFilename field name to match your EDR/FIM schema (Sysmon
+    FileCreate, osquery file_events, etc.).
+references:
+    - https://rankmath.com/kb/pro-3-0-123-security-incident/
+    - https://www.wordfence.com/blog/2026/10/rank-math-seo-pro-3-0-123-malware/
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.defense-evasion
+    - attack.t1036.005
+logsource:
+    category: file_event
+detection:
+    selection_fake_core:
+        TargetFilename|endswith: 'wp-includes/class-wp-cache-util.php'
+    selection_cache_payload:
+        TargetFilename|contains: '/wp-content/'
+        TargetFilename|endswith: '.cache'
+    condition: selection_fake_core or selection_cache_payload
+falsepositives:
+    - >
+        selection_fake_core should not fire on a legitimate install - this
+        filename is not part of WordPress core per the vendor.
+    - >
+        selection_cache_payload alone is not conclusive: some caching plugins
+        legitimately create .cache files under wp-content. Confirm the file
+        contains PHP (vendor indicator: base64_decode + XOR with key
+        'xmmqhn', proc_open, or PHP-FPM socket code) before treating as
+        confirmed compromise.
+level: high
