@@ -1,0 +1,57 @@
+title: BubbleLoader Trojanized Host Binary - File Hash Match
+id: f2c5e0be-ef69-4a1b-b28e-28672bbfaae5
+status: experimental
+description: |
+    Detects known BubbleLoader tampered-carrier binaries by SHA-256 on disk. BubbleLoader
+    patches a legitimate signed host executable's entry point and appends two PNG images
+    (one a real gradient image used as a rolling XOR key, the other a malformed PNG hiding
+    XOR-encrypted shellcode) to convert benign software into a payload delivery mechanism.
+    Documented hosts include WinRAR, x64dbg, Windows Media Player, Firefox Launcher, and
+    virtiofs. Only the on-disk tampered carrier hash is stable - BubbleLoader's anti-forensics
+    loop rewrites compiler padding with CPU-timestamp-derived randomness so the in-memory
+    unpacked payload hash differs on every execution; this rule targets the carrier file only.
+references:
+    - https://www.reversinglabs.com/blog/threat-researchers-notebook-bubbleloader
+    - https://kyberkit.com/en/articles/bubbleloader-trojanized-winrar-png-loader
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.defense-evasion
+    - attack.t1554
+    - attack.t1027.003
+    - attack.t1027.009
+logsource:
+    category: file_event
+detection:
+    # Every SHA-256 below MUST be exactly 64 hex chars - verified by script against
+    # the ReversingLabs source article's own published IOC list (24 unique hashes).
+    selection:
+        Hashes|contains:
+            - '4987af027009d572c26f6d009c5e53e237cb2e3ab9d52094c14dc0b8b6f40b14'
+            - '3bde84b2ba4c53ace15695770779383ff788d850cea38d21cb0c6d80e650d710'
+            - 'a347e678626686a9bb27120df1e92ce98561f60f0f54e2501bcb4648cc41566a'
+            - '053066c7764e8c5c35ef3b44e7c51f0cad0d287adab41966d393c78357c1c917'
+            - 'd5c8c4e528c659f6b772e16e0e26529c02faf21e46402ec0e97b25d99f801626'
+            - 'df11dd7bb354f4b020c8e3bd09f7751fc89d0b764519d7ea2bdc2f5e4d3b15be'
+            - 'f88891995c61bb349c772e8864a4d408d5ed605b59b7b7db581a58601f820029'
+            - 'e39a78e433f1704f2f5776ef389ec802beb628350691614bfc581d49842aae56'
+            - '07784d651f8d049356a98a433eeb08b4168429f1c4a8bc8d0e597381e57249e8'
+            - '08c98eb05a9b95a4f934ba67310ff670af63fc057c0c53879592b450b8848cfd'
+            - '8e01f550789617de4605dc5e3288ff51795e88462126dd71ef3ec85f3e318b37'
+            - '1e61e1842792d3f790820b3b9268edd22e68e0f43eaedfaf1015f6eaf9ef7c2d'
+            - 'ad70a492aef847553f771d6fb717541d11e242a83de63f3c0100de76a5ecdff5'
+            - 'c0974e323cb96b77a98c28f7dbc3f00bf8fe421890b2cbfb11b43a7b64fa6c3b'
+            - 'aa71f94a01b82617fbc44f6d1727c93cfc9d39727c332681f850bcbce96dc2ae'
+            - '70ece0d830302898af0df01137b4042b6a039d2ef34f77abbac48a9e73f7674a'
+            - '776e778dfe8c5c19f1433da60b7f9d0de86a84723e9bfc66bb2b2fd0f98f04bf'
+            - 'fd00db1f4e95aea21083a4eaed555091e39ea3c4200ea79bc856b45f1c2ebb3a'
+            - 'd14c71d924e965af4e98ab8f93b7ffbeb561c7fb37d5280f7146a900a7a0da6f'
+            - '17a34146fef39ec6a403546364249a574f8add6d40dfc09ee30f8ad478226f15'
+            - 'ce86d243904e31d815713351b99e251ce4b415b3df7bb204a9f8b695e9c4b333'
+            - '184f90da785a868dc1439b0796cc2081efc133040f2c4f79cfcc45acfa50089c'
+            - 'e4b6699c56fe9d3bb1f6492c9c42b0497e546155ac0f81b4994612142f5cb03f'
+            - 'da84d6ea16251c912e9603ab1f642df2b7178d07db053588f7c1f7ab3df8d4c3'
+    condition: selection
+falsepositives:
+    - None expected - these are tampered carrier binary hashes, not legitimate vendor releases
+level: critical

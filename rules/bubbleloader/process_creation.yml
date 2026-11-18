@@ -1,0 +1,52 @@
+title: BubbleLoader Reflective Loader - RWX Alloc and ntdll RtlPcToFileHeader Hook
+id: de5db3f8-bd01-42b8-9a38-b2a88a66e374
+status: experimental
+description: |
+    Behavioral detection for BubbleLoader's loader stage: allocation of RWX (read-write-
+    execute) memory via VirtualAlloc from a process matching a BubbleLoader host binary
+    name (WinRAR, x64dbg, Windows Media Player, Firefox Launcher, virtiofs), followed by a
+    VirtualProtect call and an inline hook installed over RtlPcToFileHeader in the loaded
+    ntdll.dll to fake structured-exception-handling support for the reflectively loaded
+    payload. This surface is broader than the file-hash rule (rules/bubbleloader/file_event.yml)
+    and is intended to catch unseen/future BubbleLoader variants whose on-disk hash does not
+    match the 24 currently known tampered carriers, since BubbleLoader's anti-forensics loop
+    makes the in-memory unpacked payload hash change on every execution.
+references:
+    - https://www.reversinglabs.com/blog/threat-researchers-notebook-bubbleloader
+    - https://kyberkit.com/en/articles/bubbleloader-trojanized-winrar-png-loader
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.defense-evasion
+    - attack.t1620
+    - attack.t1106
+    - attack.t1554
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    # Process name matches a documented BubbleLoader host binary.
+    selection_image:
+        Image|endswith:
+            - '\WinRAR.exe'
+            - '\x64dbg.exe'
+            - '\wmplayer.exe'
+            - '\firefox.exe'
+            - '\virtiofs.exe'
+    # EDR-visible API-call telemetry for the RWX allocation + ntdll hook sequence.
+    # CommandLine does NOT normally contain these API names - this clause is a
+    # SCHEMA PLACEHOLDER. Map 'CommandLine' to your EDR's actual API-call/call-stack
+    # field (e.g. a Sysmon-with-API-monitoring extension, EDR CallTrace, or ETW
+    # provider field) before enabling. Both signals are required (AND, not OR) to
+    # approximate the documented RWX-alloc-then-hook sequence; this still cannot
+    # confirm true temporal ordering without a sequencing-capable backend.
+    selection_behavior_alloc:
+        CommandLine|contains: 'VirtualAlloc'
+    selection_behavior_hook:
+        CommandLine|contains: 'RtlPcToFileHeader'
+    condition: selection_image and selection_behavior_alloc and selection_behavior_hook
+falsepositives:
+    - Legitimate debugging/reverse-engineering activity with x64dbg against these same hosts
+    - Other packers/protectors or EDR/AV products that also allocate RWX memory or hook ntdll for unrelated reasons
+    - This rule is broader than the file-hash rule and requires EDR telemetry that exposes API-call-level detail (VirtualAlloc/VirtualProtect targets); tune the behavior selection to your actual product's schema before enabling in production
+level: medium
