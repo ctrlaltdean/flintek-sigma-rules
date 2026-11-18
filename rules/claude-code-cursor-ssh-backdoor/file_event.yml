@@ -1,0 +1,54 @@
+title: Cursor Claude Code Backdoor - Known File Hashes and Persistence Artifacts
+id: b36b827c-c3ef-4cf1-961c-18366af4d514
+status: experimental
+description: |
+    Detects on-disk artifacts of the Cursor Claude Code extension backdoor:
+    the trojanized VSIX packages, the injected extension.js loader, the
+    dropped tunnel scripts/keys, and the per-OS persistence objects
+    (macOS LaunchAgent, Linux cron, Windows scheduled task/Startup script).
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/30/inside-malicious-claude-code-branded-cursor-extension-persistent-ssh-backdoor/
+    - https://expel.com/blog/blog-fake-claude-code-extension-cursor-ssh-backdoor/
+    - https://phoenix.security/claude-code-extension-2-1-313-cursor-marketplace-ssh-backdoor/
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.persistence
+    - attack.t1053.003
+    - attack.t1053.005
+    - attack.t1098.004
+logsource:
+    category: file_event
+detection:
+    # Known-bad SHA-256 hashes: trojanized VSIX packages (both affected
+    # versions, both affected platforms), the shared malicious extension.js
+    # loader, the dropped Windows helper script, and the decoded tunnel
+    # private key. Every hash below is confirmed 64 hex chars.
+    selection_hash:
+        Hashes|contains:
+            - 'fcbb327e38e61c4fec795e0d0591f52cd1014b813d20a5912104953c3a17c364'
+            - '3de1722901165769893bef57c72594e9a54459faa23f3091b136b79966edd081'
+            - '80402fdcad8799285fd93044976973ca000da7995fb93363f819bb8e4f84ee6c'
+            - '6786ec90cbd45949695bd7805c9fbb26cfc91bc5fc897de0183d9bcb9cb21731'
+            - 'ecb58cb29078d9646ad1dcdbe51526f2d9cfea06be5fb2ab183e8ecc3ab6bf15'
+            - '22f682d9ff55264e934d0f43fcfbb46d58be5cfb8fe1b3a7cbb38fe089c818b0'
+            - '7e0a52885fadee05544a9e99eb18c792bec05900a5e1a66d68f8383decb0e278'
+    # Persistence/dropped-artifact file paths. Pattern, not literal, for the
+    # .stk_ tunnel-key temp file (10 hex chars derived from hostname+home dir).
+    selection_macos_path:
+        TargetFilename|contains:
+            - 'Library/LaunchAgents/com.apple.sysmond.plist'
+            - '.config/.smt'
+            - '.config/.smtk'
+    selection_windows_path:
+        TargetFilename|contains:
+            - '\.config\smt.cmd'
+            - '\.config\smtk'
+            - '\Start Menu\Programs\Startup\sysmon.cmd'
+    selection_stk_pattern:
+        TargetFilename|re: '\.stk_[0-9a-f]{10}$'
+    condition: selection_hash or selection_macos_path or selection_windows_path or selection_stk_pattern
+falsepositives:
+    - selection_macos_path/selection_windows_path/selection_stk_pattern rely on filename conventions the malware itself chose to look like legitimate monitoring tooling (e.g. "sysmon", "com.apple.sysmond") - a genuine Sysmon/monitoring deployment using similar naming could collide; verify file content/origin, don't act on path match alone
+    - None expected for selection_hash - exact-match known-bad file content
+level: critical

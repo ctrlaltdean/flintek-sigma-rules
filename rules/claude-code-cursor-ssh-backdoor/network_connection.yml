@@ -1,0 +1,30 @@
+title: Cursor Claude Code Backdoor - C2 Network Connection
+id: 069be6d6-8b69-45ec-b0cc-8077ba6f935a
+status: experimental
+description: |
+    Detects outbound connections to the C2 IP used by the trojanized
+    Anthropic.claude-code 2.1.312/2.1.313 extension served via the Cursor
+    VS Code marketplace (Oct 29, 2026). The malicious loader opens a reverse
+    SSH tunnel to this host on TCP 22 and sends a host-recon beacon on TCP 8099.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/30/inside-malicious-claude-code-branded-cursor-extension-persistent-ssh-backdoor/
+    - https://expel.com/blog/blog-fake-claude-code-extension-cursor-ssh-backdoor/
+    - https://cursor.com/en-US/blog/security-incident-update
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1572
+    - attack.t1021.004
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp: '134.209.82.225'
+        DestinationPort:
+            - 22
+            - 8099
+    condition: selection
+falsepositives:
+    - None expected - this IP is attacker-controlled infrastructure specific to this campaign, not shared/legitimate hosting as far as current reporting shows
+level: critical

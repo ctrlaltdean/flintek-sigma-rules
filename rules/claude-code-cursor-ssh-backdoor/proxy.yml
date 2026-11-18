@@ -1,0 +1,31 @@
+title: Cursor Claude Code Backdoor - HTTP Beacon to C2
+id: e417af81-f943-491c-9f60-30695f15ad92
+status: experimental
+description: |
+    Detects the HTTP POST beacon the Cursor Claude Code extension backdoor
+    sends after collecting host reconnaissance (hostname, user, OS, arch,
+    home dir, git email, selected environment-variable names) to the
+    attacker's reconnaissance endpoint.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/30/inside-malicious-claude-code-branded-cursor-extension-persistent-ssh-backdoor/
+    - https://phoenix.security/claude-code-extension-2-1-313-cursor-marketplace-ssh-backdoor/
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.exfiltration
+    - attack.t1041
+    - attack.t1082
+logsource:
+    category: proxy
+detection:
+    # Require the C2 IP AND the beacon path together (not OR'd) - matching
+    # either alone would be an unbounded substring match on a bare IP/path
+    # fragment with no anchor to the rest of the known-bad URL.
+    selection:
+        c-uri|contains|all:
+            - '134.209.82.225'
+            - ':8099/beacon'
+    condition: selection
+falsepositives:
+    - None expected - attacker-controlled endpoint specific to this campaign
+level: critical

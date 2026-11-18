@@ -1,0 +1,39 @@
+title: Cursor Claude Code Backdoor - Reverse SSH Tunnel / Remote-Login Enablement
+id: 365c5b37-e05c-496b-8411-e669c98b6b16
+status: experimental
+description: |
+    Detects process command lines associated with the Cursor Claude Code
+    extension backdoor: the reverse SSH tunnel to the C2 host, the autossh
+    wrapper used to keep it alive, and the macOS command used to force-enable
+    remote login (SSH) so the tunnel has something to connect back to.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/30/inside-malicious-claude-code-branded-cursor-extension-persistent-ssh-backdoor/
+    - https://expel.com/blog/blog-fake-claude-code-extension-cursor-ssh-backdoor/
+    - https://noma.security/blog/supply-chain-attack-poisoned-claude-code-extension-installs-hidden-backdoors
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1572
+    - attack.t1098.004
+    - attack.persistence
+logsource:
+    category: process_creation
+detection:
+    # No `product:` pin - the commands below span Windows (PowerShell/
+    # scheduled-task spawn), macOS (systemsetup, launchctl) and Linux
+    # (cron-spawned sh), so this must match process-creation telemetry
+    # from any of those EDR/Sysmon-for-Linux sources.
+    selection_tunnel_ip:
+        CommandLine|contains: '134.209.82.225'
+    selection_tunnel_args:
+        CommandLine|contains|all:
+            - '-N -R'
+            - '\*:0:localhost:22'
+    selection_remote_login:
+        CommandLine|contains: 'systemsetup -setremotelogin on'
+    condition: selection_tunnel_ip or selection_tunnel_args or selection_remote_login
+falsepositives:
+    - selection_tunnel_args and selection_remote_login alone (without the C2 IP) can match legitimate remote-development reverse-tunnel tooling or intentional admin enabling of SSH - review the destination/context before acting
+    - None expected for selection_tunnel_ip - that IP is attacker infrastructure specific to this campaign
+level: high
