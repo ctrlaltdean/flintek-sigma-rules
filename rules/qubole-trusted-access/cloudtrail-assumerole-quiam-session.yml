@@ -1,0 +1,30 @@
+title: Qubole Trusted Access Attack - AssumeRole with quiam- Role Session Name
+id: d84bbb9d-3deb-4cf7-bfd9-193ec7b6fa38
+status: experimental
+description: |
+    Detects sts:AssumeRole calls whose requested role session name begins
+    with the prefix "quiam-" (e.g. quiam-enum, quiam-scope-full). Wiz CIRT
+    attributed this naming convention to the threat actor's own tooling
+    across all observed Qubole trusted-access intrusions between
+    2026-10-14 and 2026-10-26; it was not seen in legitimate Qubole
+    platform sessions in monitored environments.
+references:
+    - https://www.wiz.io/blog/qubole-cross-account-access-abused-in-the-wild
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.initial-access
+    - attack.t1199
+    - attack.discovery
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: sts.amazonaws.com
+        eventName: AssumeRole
+        requestParameters.roleSessionName|startswith: 'quiam-'
+    condition: selection
+falsepositives:
+    - Not observed in legitimate Qubole sessions by Wiz CIRT, but the naming convention is attacker tooling, not a cryptographic indicator - treat as high confidence rather than absolute
+level: high

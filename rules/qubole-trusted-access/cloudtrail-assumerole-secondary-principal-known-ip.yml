@@ -1,0 +1,37 @@
+title: Qubole Trusted Access Attack - AssumeRole by Secondary Principal from Known Attacker Infra
+id: 84605ba5-8556-42c2-ad1a-53cca789f589
+status: experimental
+description: |
+    Detects sts:AssumeRole calls by IAM principal AIDAJYRRH5Y3A7AAJM2HW
+    (also inside Qubole's AWS account, 805246085872) when the source IP is
+    one of the VPN/VPS egress points Wiz CIRT attributed to the threat actor
+    starting 2026-10-18. This principal also carries legitimate Qubole
+    platform traffic from AWS-owned infrastructure, so the rule requires a
+    match on the known malicious source IP to separate attacker use from
+    normal operation.
+references:
+    - https://www.wiz.io/blog/qubole-cross-account-access-abused-in-the-wild
+    - https://securitypointbreak.com/2026/11/09/qubole-aws-cross-account-supply-chain-attack/
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.initial-access
+    - attack.t1199
+    - attack.t1078.004
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection_principal:
+        eventSource: sts.amazonaws.com
+        eventName: AssumeRole
+        userIdentity.principalId: AIDAJYRRH5Y3A7AAJM2HW
+    selection_ip:
+        sourceIPAddress:
+            - '45.83.220.211'
+            - '57.129.54.120'
+            - '185.209.199.73'
+    condition: selection_principal and selection_ip
+falsepositives:
+    - This principal also carries legitimate Qubole platform traffic from AWS infrastructure; the source-IP condition is required to exclude that
+level: critical

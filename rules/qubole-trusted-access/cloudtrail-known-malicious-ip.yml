@@ -1,0 +1,33 @@
+title: Qubole Trusted Access Attack - CloudTrail Activity from Known Attacker Infrastructure
+id: 934db644-c67f-4faf-b6fe-b4b14f9f1b47
+status: experimental
+description: |
+    Detects any CloudTrail event with a sourceIPAddress matching one of the
+    three egress points Wiz CIRT attributed to the Qubole trusted-access
+    threat actor (two Mullvad VPN exits, one OVH-hosted VPS) during the
+    2026-10-14 to 2026-10-26 campaign. These are shared/VPN addresses, so a
+    match is a lead to investigate (especially against Qubole integration
+    roles), not standalone proof of compromise.
+references:
+    - https://www.wiz.io/blog/qubole-cross-account-access-abused-in-the-wild
+    - https://www.csoonline.com/article/4246780/qubole-supply-chain-attack-exposed-aws-entra-id-and-okta-credentials.html
+    - https://securitypointbreak.com/2026/11/09/qubole-aws-cross-account-supply-chain-attack/
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.initial-access
+    - attack.t1199
+    - attack.t1090.003
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        sourceIPAddress:
+            - '45.83.220.211'
+            - '57.129.54.120'
+            - '185.209.199.73'
+    condition: selection
+falsepositives:
+    - Mullvad VPN exit nodes are shared infrastructure; a match on IP alone is a lead, not proof - corroborate with the principal IDs or quiam- session names in this same rule pack
+level: medium

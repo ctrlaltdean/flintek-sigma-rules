@@ -1,0 +1,33 @@
+title: Qubole Trusted Access Attack - TruffleHog Credential Validation via GetCallerIdentity
+id: b226cb8b-5d5a-4ff2-a4a5-cc6797e92d74
+status: experimental
+description: |
+    Detects sts:GetCallerIdentity calls carrying a TruffleHog user agent.
+    Wiz CIRT observed the Qubole trusted-access threat actor using
+    TruffleHog between 2026-10-16 and 2026-10-19 to validate AWS, Entra ID
+    and Okta credentials harvested from compromised environments.
+    TruffleHog is also run by legitimate security teams, so treat a match
+    as suspicious only when paired with another indicator in this rule
+    pack (known attacker IP, malicious principal ID, or quiam- session
+    name).
+references:
+    - https://www.wiz.io/blog/qubole-cross-account-access-abused-in-the-wild
+    - https://www.csoonline.com/article/4246780/qubole-supply-chain-attack-exposed-aws-entra-id-and-okta-credentials.html
+author: Vance
+date: 2026-11-18
+tags:
+    - attack.credential-access
+    - attack.t1552
+    - attack.t1589.001
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: sts.amazonaws.com
+        eventName: GetCallerIdentity
+        userAgent|contains: 'TruffleHog'
+    condition: selection
+falsepositives:
+    - Legitimate internal secrets-scanning (TruffleHog is a common open-source tool) will also match; require correlation with another IOC in this pack before treating as confirmed malicious
+level: medium
