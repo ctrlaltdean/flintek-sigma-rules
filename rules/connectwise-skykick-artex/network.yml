@@ -1,0 +1,30 @@
+title: ConnectWise SkyKick/Cloud Backup Credential Abuse - Storm-0940 C2 Network Connection
+id: 53b6db39-a6cb-4407-a8b2-e0737305f601
+status: experimental
+description: Detects Graph API/sign-in activity from the primary confirmed IOC IP in the ConnectWise Cloud Backup (SkyKick) OAuth credential abuse attributed to Storm-0940/ARTEX
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise
+    - https://www.huntress.com/blog/vendor-credential-enables-unauthorized-access
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.initial-access
+    - attack.t1195
+    - attack.t1078.004
+logsource:
+    category: network_connection
+detection:
+    selection_high_confidence:
+        DestinationIp:
+            - '144.172.64.128'
+    selection_low_confidence:
+        DestinationIp:
+            - '144.172.64.99'
+            - '144.172.64.60'
+            - '187.15.88.186'
+            - '187.15.90.217'
+            - '187.15.89.186'
+    condition: selection_high_confidence or selection_low_confidence
+falsepositives:
+    - selection_low_confidence IPs showed only password-spray/failed-login noise or transient VPN exit activity per Huntress's independent telemetry review of 10,000+ tenants, not confirmed application sign-ins. Treat matches on this selection as lower-priority leads, not confirmed compromise.
+level: high

@@ -1,0 +1,29 @@
+title: ConnectWise SkyKick/Cloud Backup Credential Abuse - Scripted Tooling User-Agent
+id: 84cf57e7-1511-446e-b317-fa99d647a77e
+status: experimental
+description: Detects M365/Graph API sign-ins using scripted-tooling user agents observed during the Storm-0940/ARTEX ConnectWise Cloud Backup credential abuse campaign. This is a medium-confidence behavioral signal, not unique to this actor alone - correlate with the compromised app IDs or IOC IPs before treating as confirmed.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.initial-access
+    - attack.t1195
+logsource:
+    category: application
+    service: azuread
+detection:
+    selection:
+        UserAgent:
+            - 'Python-urllib/3.12'
+            - 'python-requests/2.31.0'
+            - 'python-requests/2.34.2'
+            - 'curl/7.88.1'
+            - 'azure-toolkit/1.0'
+        AppId:
+            - 'b78f6a77-d4e5-46fb-87e5-d1648bd02519'
+            - '24205314-2b89-4e07-a2a4-579e898a5640'
+    condition: selection
+falsepositives:
+    - These user agents (curl, python-requests, etc.) are common for legitimate automation/scripting against Graph API. Only meaningful when paired with the specific ConnectWise AppIds above, which this rule already requires.
+level: medium

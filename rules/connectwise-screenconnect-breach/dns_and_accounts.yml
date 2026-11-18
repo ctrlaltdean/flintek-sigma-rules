@@ -1,0 +1,50 @@
+title: ConnectWise ScreenConnect Breach - C2 Domain Query
+id: ce6f6b20-375c-4fac-a6ce-268a39ffa400
+status: experimental
+description: Detects DNS queries to attacker C2 infrastructure reported by ConnectWise's own Trust Center advisory for the ScreenConnect breach affecting approximately 50 organizations (Nov 2026). Separate incident from the SkyKick/ARTEX credential abuse.
+references:
+    - https://www.connectwise.com/company/trust/advisories
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+logsource:
+    category: dns
+detection:
+    selection_exact:
+        query:
+            - 'newnewnew.gotdns.org'
+            - 'soxnewwork.homedns.org'
+    selection_subdomain:
+        query|endswith:
+            - '.newnewnew.gotdns.org'
+            - '.soxnewwork.homedns.org'
+    condition: selection_exact or selection_subdomain
+falsepositives:
+    - None expected - dynamic DNS hostnames reported directly by ConnectWise as attacker infrastructure
+level: critical
+---
+title: ConnectWise ScreenConnect Breach - Suspicious Operator Account Names
+id: fd1c5954-b265-4add-b651-09c4ef4d2ea1
+status: experimental
+description: Detects creation or use of ScreenConnect account/operator names reported as attacker-associated in the ConnectWise ScreenConnect breach advisory (Nov 2026)
+references:
+    - https://www.connectwise.com/company/trust/advisories
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.persistence
+    - attack.t1136
+logsource:
+    product: screenconnect
+    category: application
+detection:
+    selection:
+        AccountName|contains:
+            - 'Addmin'
+            - 'rmmserver'
+    condition: selection
+falsepositives:
+    - Account name matching alone is a weak signal (these could coincidentally resemble legitimate internal naming) - ConnectWise's advisory lists them as 'reported' associations, not confirmed-malicious in every occurrence. Correlate with the C2 domain rule in this same folder before treating as confirmed.
+level: medium
