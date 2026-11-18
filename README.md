@@ -9,6 +9,12 @@ pip install sigma-cli
 sigma convert -t splunk -p sentinel_asim rules/optimjack-dns.yml
 ```
 
+## About this repo
+
+Rules here are mostly researched and drafted by AI (open-source threat reporting review + Sigma authoring), then published for the community. They are a starting point, not a finished detection.
+
+**Audit before you deploy.** Validate logsource field names against your own schema, confirm IOCs are still live/relevant (domains and IPs in takedown-prone campaigns go stale fast), and test for false positives in your environment before enabling in production. Treat every rule as `status: experimental` until you've reviewed it yourself.
+
 ## Incidents covered
 
 ### OPTIMJACK — Optimizely Web Experimentation supply chain compromise (Nov 16-17, 2026)
