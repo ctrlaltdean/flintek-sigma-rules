@@ -199,6 +199,18 @@ Microsoft's official `agent-framework` PyPI package was compromised twice ~33 mi
 
 **Caveat:** the only network indicator is `webhook[.]site`, a legitimate shared service abused for exfil — documented as a hunting lead in the vault note, not forced into a Sigma rule.
 
+### EggStreme v2 — Chinese APT malware rebuild targeting Philippine government (Nov 18, 2026)
+
+Suspected Chinese APT group rebuilt its EggStreme fileless malware framework after Bitdefender's Sept 2025 exposure: new EggStremeFuel config encryption, a new loader cipher/payload format, an expanded EggStremeAgent command set, and a passive (non-beaconing) listening variant. Bitdefender assesses high confidence the operation continues targeting multiple Philippine government organizations, low-to-medium confidence on Taiwan.
+
+- `rules/eggstreme-v2/dns.yml` - DNS queries to newer-protocol + original-infrastructure C2 domains
+- `rules/eggstreme-v2/network_connection.yml` - outbound connections to C2/development IPs
+- `rules/eggstreme-v2/file_event.yml` - known component/config file hashes (MD5)
+
+**Sources:** Bitdefender (primary), The Hacker News, Infosecurity Magazine, alcybr — all derivative of the one Bitdefender IOC dataset, treat as single-source.
+
+**Caveat:** indicators span Sept 2025-Nov 2026 compile times; older domains/IPs may be sinkholed or reassigned by now — re-verify liveness before blocking. No CVE/initial-access-vector confirmed for the 2026 wave.
+
 ## License
 
 Apache 2.0

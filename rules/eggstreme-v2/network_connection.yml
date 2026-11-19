@@ -1,0 +1,38 @@
+title: EggStreme v2 - C2 Network Connection
+id: 05fe4be7-f80e-46a1-8ab0-99528f9bea27
+status: experimental
+description: |
+    Detects outbound connections to EggStreme (EggStremeFuel/EggStremeAgent)
+    C2 and development IP infrastructure from Bitdefender's November 2026
+    EggStreme rebuild report.
+references:
+    - https://www.bitdefender.com/en-us/blog/businessinsights/eggstreme-malware-revises-architecture-infrastructure
+    - https://github.com/bitdefender/malware-ioc/blob/master/2026_11-eggstreme-iocs.csv
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp:
+            - '45.115.225.73'
+            - '109.248.24.84'
+            - '149.104.109.230'
+            - '221.128.249.228'
+            - '45.221.112.129'
+            - '141.98.215.76'
+            - '49.157.46.200'
+            - '103.18.229.206'
+            - '49.157.47.158'
+            - '141.98.215.91'
+            - '165.154.58.112'
+            - '154.90.32.171'
+    condition: selection
+falsepositives:
+    - Shared/hosting-provider IP space could theoretically be reused for
+      unrelated services after this report; low probability given narrow
+      IOC scope but re-verify liveness before blocking at the perimeter
+level: high

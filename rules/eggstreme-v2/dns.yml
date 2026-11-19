@@ -1,0 +1,115 @@
+title: EggStreme v2 - Malicious C2 Domain DNS Query
+id: 7c0cfb23-de89-4cfd-ad21-8da64f54a8a2
+status: experimental
+description: |
+    Detects DNS queries to EggStreme (EggStremeAgent/EggStremeFuel) C2 domains,
+    both the newer-protocol infrastructure and the original (2019 CA-linked)
+    infrastructure, from Bitdefender's November 2026 EggStreme rebuild report.
+references:
+    - https://www.bitdefender.com/en-us/blog/businessinsights/eggstreme-malware-revises-architecture-infrastructure
+    - https://github.com/bitdefender/malware-ioc/blob/master/2026_11-eggstreme-iocs.csv
+author: MILO
+date: 2026-11-18
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+    - attack.t1568
+logsource:
+    category: dns
+detection:
+    # Exact match for the bare domain, |endswith for subdomains - never a
+    # bare |contains on a domain string (substring false positives).
+    selection_exact:
+        query:
+            - 'rodosdeals.com'
+            - 'eusurvey.org'
+            - 'fsstore.org'
+            - 'bigitx.com'
+            - 'laichingte.net'
+            - 'rishra.net'
+            - 'osaweb.org'
+            - 'precontact.org'
+            - 'siliconmetal.net'
+            - 'dalkeys.com'
+            - 'salariedemployment.com'
+            - 'mepintei.com'
+            - 'readyui.net'
+            - 'hostkbc.com'
+            - 'fetraa.com'
+            - 'konledge.com'
+            - 'kiakzo.com'
+            - 'whosecity.org'
+            - 'flowtide.org'
+            - 'naeal.org'
+            - 'addadhd.net'
+            - 'sealtribute.org'
+            - 'gbbmv.org'
+            - 'logidash.net'
+            - 'greenat.org'
+            - 'ronaldmooremd.net'
+            - 'vepress.org'
+            - 'dservicos.com'
+            - 'saluxestore.com'
+            - 'oknostr.com'
+            - 'kypirc.org'
+            - 'sgko.net'
+            - 'eworkify.com'
+            - 'kazinovavada.com'
+            - 'ecomvisu.com'
+            - 'brushux.com'
+            - 'webpirat.net'
+            - 'safiasol.com'
+            - 'owark.org'
+            - 'renoveair.com'
+            - 'padau.org'
+            - 'zonaimpo.com'
+            - 'ageniu.org'
+    selection_subdomain:
+        query|endswith:
+            - '.rodosdeals.com'
+            - '.eusurvey.org'
+            - '.fsstore.org'
+            - '.bigitx.com'
+            - '.laichingte.net'
+            - '.rishra.net'
+            - '.osaweb.org'
+            - '.precontact.org'
+            - '.siliconmetal.net'
+            - '.dalkeys.com'
+            - '.salariedemployment.com'
+            - '.mepintei.com'
+            - '.readyui.net'
+            - '.hostkbc.com'
+            - '.fetraa.com'
+            - '.konledge.com'
+            - '.kiakzo.com'
+            - '.whosecity.org'
+            - '.flowtide.org'
+            - '.naeal.org'
+            - '.addadhd.net'
+            - '.sealtribute.org'
+            - '.gbbmv.org'
+            - '.logidash.net'
+            - '.greenat.org'
+            - '.ronaldmooremd.net'
+            - '.vepress.org'
+            - '.dservicos.com'
+            - '.saluxestore.com'
+            - '.oknostr.com'
+            - '.kypirc.org'
+            - '.sgko.net'
+            - '.eworkify.com'
+            - '.kazinovavada.com'
+            - '.ecomvisu.com'
+            - '.brushux.com'
+            - '.webpirat.net'
+            - '.safiasol.com'
+            - '.owark.org'
+            - '.renoveair.com'
+            - '.padau.org'
+            - '.zonaimpo.com'
+            - '.ageniu.org'
+    condition: selection_exact or selection_subdomain
+falsepositives:
+    - None expected - these are attacker-registered domains
+level: critical
