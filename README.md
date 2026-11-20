@@ -19,6 +19,16 @@ Rules here are mostly researched and drafted by AI (open-source threat reporting
 
 ## Incidents covered
 
+### ARMORY CASTLE - vCenter CVE-2026-123890 campaign (Nov 2026)
+
+- `rules/armory-castle-vcenter/network_connection.yml` - 11 suspected obfuscation-network IPs, either endpoint
+- `rules/armory-castle-vcenter/file_event.yml` - LAZYBONES path and BONESAW signer-extraction artifacts
+- `rules/armory-castle-vcenter/process_creation.yml` - observed BEARBONES temporary SSH listener execution
+
+**Sources:** [GTIG/Mandiant](https://cloud.google.com/blog/topics/threat-intelligence/armory-castle-exploits-vsphere), [Broadcom advisory](https://support.broadcom.com/web/ecx/support-content-notification/-/external/content/SecurityAdvisories/0/39495).
+
+**Caveat:** all campaign IOCs are single-source GTIG observations. Broadcom confirms the vulnerability, not the indicators. IPs may be compromised third-party infrastructure, not attacker-owned C2. Historical, experimental hunting leads only; no liveness or local telemetry coverage verified. Sigma validation and independent Codex review passed after path-case and ATT&CK-tag corrections.
+
 ### OPTIMJACK — Optimizely Web Experimentation supply chain compromise (Nov 16-17, 2026)
 
 Attacker gained write access to customer "Project JavaScript" fields on Optimizely Web Experimentation, serving a crypto clipper / card skimmer / cookie-screenshot stealer / iOS exploit loader to visitors of 178 organizations (BBC, CNN, Zoom, Salesforce, GitLab, HSBC, IKEA, etc.) via Optimizely's own trusted CDN.

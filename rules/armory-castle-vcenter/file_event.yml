@@ -1,0 +1,27 @@
+title: ARMORY CASTLE LAZYBONES Path or BONESAW Signer Extraction Artifact
+id: 0e694be6-c331-45fd-9da7-958699b63474
+status: experimental
+description: >-
+    Detects the reported LAZYBONES installation path or BONESAW signer-extraction
+    output layout. Single-source artifact leads requiring content verification.
+    Does not alert on generic temporary filenames or the legitimate vCenter database.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/armory-castle-exploits-vsphere
+author: MILO
+date: 2026-11-20
+tags:
+    - attack.credential-access
+    - attack.t1552.004
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection_lazybones:
+        TargetFilename|cased: '/usr/bin/vmtoolscs'
+    selection_bonesaw:
+        TargetFilename|re: '/temp/extracted_tenant_signer_[^/]+/(anon_[^/]+_data\.mdb|[^/]+-tenantcredential-[0-9]+\.(key\.pem|key\.der|leaf\.pem|chain\.pem|context\.json))$'
+    condition: selection_lazybones or selection_bonesaw
+falsepositives:
+    - Authorized incident response, malware analysis, or reproduction of reported artifacts.
+    - Unrelated software using the same installation path or extraction output layout.
+level: high

@@ -1,0 +1,29 @@
+title: ARMORY CASTLE BEARBONES Observed Temporary SSH Listener Execution
+id: b0fa778c-3029-4f18-b32d-7e890a544878
+status: experimental
+description: >-
+    Detects the reported BEARBONES executable path together with the observed
+    Dropbear-style listener arguments. Narrow single-source hunt, not a generic
+    SSH listener or exploit detector. Renaming or changing arguments evades it.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/armory-castle-exploits-vsphere
+author: MILO
+date: 2026-11-20
+tags:
+    - attack.command-and-control
+    - attack.t1571
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_image:
+        Image|cased: '/tmp/dbr'
+    selection_flag:
+        CommandLine|re: '\s-R(\s|$)'
+    selection_port:
+        CommandLine|re: '\s-p\s+(53|33992)(\s|$)'
+    condition: selection_image and selection_flag and selection_port
+falsepositives:
+    - An authorized Dropbear build staged at this exact path with these listener options.
+    - Authorized malware analysis or incident-response reproduction.
+level: high
