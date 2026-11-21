@@ -1,0 +1,28 @@
+title: Cairn University Campaign Historical IP Connection
+id: f2a8726b-9b8c-432d-a5be-05f87add9b17
+status: experimental
+description: >-
+    Detects either endpoint matching two addresses published by Amazon Threat
+    Intelligence for Cairn campaign records dated September 8-10, 2026.
+    Single-source historical associations; direction and individual address
+    roles are unspecified. A match is a hunting lead, not proof of compromise.
+references:
+    - https://aws.amazon.com/blogs/security/chinese-nexus-actors-cairn-ai-agents-found-a-zero-day-on-their-own/
+author: MILO
+date: 2026-11-20
+logsource:
+    category: network_connection
+detection:
+    selection_source:
+        SourceIp:
+            - '142.4.98.145'
+            - '142.4.107.34'
+    selection_destination:
+        DestinationIp:
+            - '142.4.98.145'
+            - '142.4.107.34'
+    condition: selection_source or selection_destination
+falsepositives:
+    - Legitimate traffic to shared or reassigned infrastructure after the historical activity
+    - Authorized research or security testing involving the listed addresses
+level: medium

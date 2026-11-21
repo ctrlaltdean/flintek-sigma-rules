@@ -19,6 +19,14 @@ Rules here are mostly researched and drafted by AI (open-source threat reporting
 
 ## Incidents covered
 
+### Cairn - MONAI Label university intrusions (Nov 20, 2026 disclosure)
+
+- `rules/cairn-monai-label/network_connection.yml` - exact match on two historical IPs, either endpoint
+
+**Sources:** [Amazon Threat Intelligence](https://aws.amazon.com/blogs/security/chinese-nexus-actors-cairn-ai-agents-found-a-zero-day-on-their-own/), [MONAI Label advisory](https://github.com/Project-MONAI/MONAILabel/security/advisories/GHSA-qc22-rmgc-vg94).
+
+**Caveat:** IP associations are single-source AWS records dated September 8-10, 2026; individual roles and traffic direction are unspecified. The MONAI advisory corroborates the flaw, not the IPs. No current liveness or maliciousness verified. Historical hunting leads only, not automatic blocklist entries. Gambit's separate retail campaign is excluded.
+
 ### ARMORY CASTLE - vCenter CVE-2026-123890 campaign (Nov 2026)
 
 - `rules/armory-castle-vcenter/network_connection.yml` - 11 suspected obfuscation-network IPs, either endpoint
