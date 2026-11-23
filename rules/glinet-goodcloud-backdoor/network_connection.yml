@@ -1,0 +1,24 @@
+title: GL.iNet GoodCloud Backdoor - C2/Reverse Shell Network Connection
+id: d882bc09-858c-4096-a2de-51c2ad458af3
+status: experimental
+description: Detects outbound connections to C2/reverse-shell infrastructure used in the November 2026 GL.iNet GoodCloud cloud compromise that pushed malware to customer routers and KVM devices
+references:
+    - https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/
+    - https://www.gl-inet.com/blogs/blog/glinet-security-notice-2026-11-20
+author: MILO
+date: 2026-11-22
+tags:
+    - attack.command-and-control
+    - attack.t1071
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp:
+            - '170.39.226.219'
+            - '66.245.219.252'
+            - '65.20.71.131'
+    condition: selection
+falsepositives:
+    - None expected - these are attacker-controlled hosts specific to this campaign
+level: critical

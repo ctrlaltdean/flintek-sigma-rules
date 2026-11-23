@@ -1,0 +1,32 @@
+title: GL.iNet GoodCloud Backdoor - Malicious File Artifacts
+id: ed6d2355-ec95-4524-9c5f-203fe752bbaf
+status: experimental
+description: Detects file artifacts dropped or modified by malware installed via the November 2026 GL.iNet GoodCloud cloud compromise (installer script, downloaded payloads, trojanized netstat, modified startup script). No SHA-256 hashes were published for this campaign's binaries, so detection is filename/path based.
+references:
+    - https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/
+    - https://ciomonitor.com/articles/hackers-breached-gl-inet-s-cloud-to-plant-router-and-kvm-malware
+author: MILO
+date: 2026-11-22
+tags:
+    - attack.persistence
+    - attack.t1543
+    - attack.defense-evasion
+    - attack.t1070
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection_dropped:
+        TargetFilename|endswith:
+            - '/ni.sh'
+            - '/gl-helper'
+            - '/gb'
+    selection_modified:
+        TargetFilename:
+            - '/etc/init.d/urandom_seed'
+            - '/usr/bin/netstat'
+            - '/bin/netstat'
+    condition: selection_dropped or selection_modified
+falsepositives:
+    - 'urandom_seed and netstat are legitimate stock files on OpenWrt-based firmware; this rule should fire on MODIFICATION/write events to these paths outside a firmware update process, not on their mere existence - tune to the source log''s change/write semantics'
+level: high

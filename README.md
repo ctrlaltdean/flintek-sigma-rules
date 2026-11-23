@@ -229,6 +229,18 @@ Suspected Chinese APT group rebuilt its EggStreme fileless malware framework aft
 
 **Caveat:** indicators span Sept 2025-Nov 2026 compile times; older domains/IPs may be sinkholed or reassigned by now — re-verify liveness before blocking. No CVE/initial-access-vector confirmed for the 2026 wave.
 
+### GL.iNet GoodCloud router/KVM backdoor campaign (Nov 20-22, 2026)
+
+Attackers exploited a vulnerability in GL.iNet's GoodCloud cloud remote-management platform to push custom malware to customer routers and KVM devices, including root-level reverse shells. GL.iNet patched the cloud flaw on Nov 20-21 but existing infections persist. A separately-reported, apparently older backdoor (first seen ~Sept 2025) on some GoodCloud-bound routers is not yet confirmed to be the same actor/campaign.
+
+- `rules/glinet-goodcloud-backdoor/network_connection.yml` - C2/reverse-shell IPs
+- `rules/glinet-goodcloud-backdoor/process_creation.yml` - masquerading process names (GL.iNet's own published IOC + older-backdoor process names)
+- `rules/glinet-goodcloud-backdoor/file_event.yml` - dropped installer/payload filenames + modified startup script/netstat paths
+
+**Sources:** [BleepingComputer](https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/), [GL.iNet official advisory](https://www.gl-inet.com/blogs/blog/glinet-security-notice-2026-11-20), [PrivacyAffairs](https://www.privacyaffairs.com/glinet-router-backdoor/), [CIO Monitor](https://ciomonitor.com/articles/hackers-breached-gl-inet-s-cloud-to-plant-router-and-kvm-malware).
+
+**Caveat:** no SHA-256 hashes were published for the November malware; detection here is filename/process/network based. The older backdoor's binary hash varies per device (41 unique hashes on 41 routers checked), so hash-matching would not work for it regardless. DNS query-name fragments reported for the older backdoor (`adguardns`, `lede-openproject`, etc.) are not confirmed full domains and were excluded from the rules. The older-backdoor findings come from a single primary source cluster (GL.iNet forum + RemoteToHome Consulting); treat with more caution than the independently-verified `ni.sh`/C2-IP findings.
+
 ## License
 
 Apache 2.0

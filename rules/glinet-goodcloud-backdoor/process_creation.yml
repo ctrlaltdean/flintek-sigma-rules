@@ -1,0 +1,30 @@
+title: GL.iNet GoodCloud Backdoor - Masquerading Process Names
+id: c23bb07c-7b05-4bdf-920b-dc8bdd6fbc3c
+status: experimental
+description: Detects process names used by malware installed via the November 2026 GL.iNet GoodCloud compromise (official vendor IOC) and by a separately-reported older backdoor on GoodCloud-bound routers
+references:
+    - https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/
+    - https://www.gl-inet.com/blogs/blog/glinet-security-notice-2026-11-20
+    - https://www.privacyaffairs.com/glinet-router-backdoor/
+author: MILO
+date: 2026-11-22
+tags:
+    - attack.defense-evasion
+    - attack.t1036
+    - attack.persistence
+    - attack.t1543
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_november_ioc:
+        CommandLine|contains: 'crond -i /tmp/.log'
+    selection_older_backdoor:
+        Image|endswith:
+            - '/ulogd'
+            - '/monitord'
+            - '/ujaild'
+    condition: selection_november_ioc or selection_older_backdoor
+falsepositives:
+    - 'ulogd is also a legitimate Linux logging daemon name on some distributions; verify path is /bin/ulogd on GL.iNet/OpenWrt-based firmware and not a package-managed install elsewhere before treating as malicious'
+level: high
