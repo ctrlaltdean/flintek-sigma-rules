@@ -241,6 +241,18 @@ Attackers exploited a vulnerability in GL.iNet's GoodCloud cloud remote-manageme
 
 **Caveat:** no SHA-256 hashes were published for the November malware; detection here is filename/process/network based. The older backdoor's binary hash varies per device (41 unique hashes on 41 routers checked), so hash-matching would not work for it regardless. DNS query-name fragments reported for the older backdoor (`adguardns`, `lede-openproject`, etc.) are not confirmed full domains and were excluded from the rules. The older-backdoor findings come from a single primary source cluster (GL.iNet forum + RemoteToHome Consulting); treat with more caution than the independently-verified `ni.sh`/C2-IP findings.
 
+### Cisco Expressway CVE-2026-76466 exploitation (Nov 2026)
+
+Unauthenticated root RCE in the clustered database service of Cisco Expressway-C/E (hard-coded Erlang distribution cookie, no client-cert validation). Cisco fixed it Oct 21, 2026; a public PoC landed on GitHub, and F6 (published Nov 19) reported the first observed in-the-wild exploitation, against a Russian organization — 2 internet-facing devices breached, pivoted to 2 more internal cluster nodes, then staged Python recon/credential-theft tooling (SMB/SQL Server/WinRM/GitLab).
+
+- `rules/cisco-expressway-cve-2026-76466/network_connection.yml` - F6's two attacker source IPs
+- `rules/cisco-expressway-cve-2026-76466/file_event.yml` - staged Python script path pattern under `/mnt/harddisk/`
+- `rules/cisco-expressway-cve-2026-76466/application.yml` - Erlang `nodeup 'wombat@127.0.0.1'` exploitation log signature
+
+**Sources:** [F6](https://f6.security/media-center/press-releases/cisco-vulnerability-exploitation/) (primary), [TheHackerNews](https://thehackernews.com/2026/11/hackers-exploit-critical-cisco.html), [SecurityWeek](https://www.securityweek.com/hackers-exploit-cisco-expressway-vulnerability-soon-after-poc-release/), [SecurityAffairs](https://securityaffairs.com/203598/hacking/hackers-exploit-cisco-expressway-flaw-cve-2026-76466-to-breach-russian-organization.html).
+
+**Caveat:** all technical IOCs trace to F6's single report (widely syndicated, not independently corroborated). Only one confirmed victim; treat the two IPs as tied to this specific incident, not a comprehensive list for the whole exploitation wave. No file hashes published for the staged scripts.
+
 ## License
 
 Apache 2.0
