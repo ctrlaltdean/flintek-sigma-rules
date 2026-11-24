@@ -229,17 +229,45 @@ Suspected Chinese APT group rebuilt its EggStreme fileless malware framework aft
 
 **Caveat:** indicators span Sept 2025-Nov 2026 compile times; older domains/IPs may be sinkholed or reassigned by now — re-verify liveness before blocking. No CVE/initial-access-vector confirmed for the 2026 wave.
 
-### GL.iNet GoodCloud router/KVM backdoor campaign (Nov 20-22, 2026)
+### GL.iNet GoodCloud router/KVM backdoor campaign (Nov 20-23, 2026, updated)
 
-Attackers exploited a vulnerability in GL.iNet's GoodCloud cloud remote-management platform to push custom malware to customer routers and KVM devices, including root-level reverse shells. GL.iNet patched the cloud flaw on Nov 20-21 but existing infections persist. A separately-reported, apparently older backdoor (first seen ~Sept 2025) on some GoodCloud-bound routers is not yet confirmed to be the same actor/campaign.
+Attackers exploited a vulnerability in GL.iNet's GoodCloud cloud remote-management platform to push custom malware to customer routers and KVM devices, including root-level reverse shells. GL.iNet patched the cloud flaw on Nov 20-21 but existing infections persist. A separately-reported, apparently older backdoor (first seen ~Sept 2025) on some GoodCloud-bound routers is not yet confirmed to be the same actor/campaign. **Nov 23 update:** added a look-alike dropper domain (`gl-inet.top`), two dropper-stage URLs, a wider C2 IP range, and KVM filesystem marker indicators, sourced from an independent forum IOC report and the RemoteToHome Consulting GitHub investigation.
 
-- `rules/glinet-goodcloud-backdoor/network_connection.yml` - C2/reverse-shell IPs
+- `rules/glinet-goodcloud-backdoor/network_connection.yml` - C2/reverse-shell IPs, including the `170.39.226.0/24` range
 - `rules/glinet-goodcloud-backdoor/process_creation.yml` - masquerading process names (GL.iNet's own published IOC + older-backdoor process names)
-- `rules/glinet-goodcloud-backdoor/file_event.yml` - dropped installer/payload filenames + modified startup script/netstat paths
+- `rules/glinet-goodcloud-backdoor/file_event.yml` - dropped installer/payload filenames, modified startup script/netstat paths, KVM marker files, `/tmp/f` named pipe
+- `rules/glinet-goodcloud-backdoor/dns.yml` - `gl-inet.top` look-alike domain
+- `rules/glinet-goodcloud-backdoor/proxy.yml` - `ni.sh`/`n5` dropper-stage URLs over TCP 8000
 
-**Sources:** [BleepingComputer](https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/), [GL.iNet official advisory](https://www.gl-inet.com/blogs/blog/glinet-security-notice-2026-11-20), [PrivacyAffairs](https://www.privacyaffairs.com/glinet-router-backdoor/), [CIO Monitor](https://ciomonitor.com/articles/hackers-breached-gl-inet-s-cloud-to-plant-router-and-kvm-malware).
+**Sources:** [BleepingComputer](https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/), [GL.iNet official advisory](https://www.gl-inet.com/blogs/blog/glinet-security-notice-2026-11-20), [PrivacyAffairs](https://www.privacyaffairs.com/glinet-router-backdoor/), [CIO Monitor](https://ciomonitor.com/articles/hackers-breached-gl-inet-s-cloud-to-plant-router-and-kvm-malware), [The Hacker News](https://thehackernews.com/2026/11/hackers-exploited-glinet-cloud-flaw-to.html), [RemoteToHome Consulting investigation](https://github.com/RemoteToHome-io/gl-security-incident-2026).
 
-**Caveat:** no SHA-256 hashes were published for the November malware; detection here is filename/process/network based. The older backdoor's binary hash varies per device (41 unique hashes on 41 routers checked), so hash-matching would not work for it regardless. DNS query-name fragments reported for the older backdoor (`adguardns`, `lede-openproject`, etc.) are not confirmed full domains and were excluded from the rules. The older-backdoor findings come from a single primary source cluster (GL.iNet forum + RemoteToHome Consulting); treat with more caution than the independently-verified `ni.sh`/C2-IP findings.
+**Caveat:** no SHA-256 hashes were published for the November malware; detection here is filename/process/network based. The older backdoor's binary hash varies per device (41 unique hashes on 41 routers checked), so hash-matching would not work for it regardless. DNS query-name fragments reported for the older backdoor (`adguardns`, `lede-openproject`, etc.) are not confirmed full domains and were excluded from the rules. The older-backdoor findings come from a single primary source cluster (GL.iNet forum + RemoteToHome Consulting); treat with more caution than the independently-verified `ni.sh`/C2-IP findings. `api.trongrid.io` is legitimate TRON blockchain API infrastructure abused by the implant, not an indicator — do not block it.
+
+### CVE-2026-131914 — Idunno.AntiCsrf ASP.NET unauthenticated RCE (Nov 2026)
+
+Critical (CVSS 9.3) insecure-deserialization RCE in the defunct, unmaintained third-party ASP.NET WebForms module Idunno.AntiCsrf (last released 2008, no official patch). The module deserializes the CSRF token before validating it, so a single unauthenticated POST to any anonymously-reachable `.aspx` endpoint can achieve RCE in the IIS worker process. Disclosed by Google Mandiant, which reports active exploitation in the wild but published no attacker C2 infrastructure.
+
+- `rules/idunno-anticsrf-cve-2026-131914/webserver.yml` - anomalous POST to `.aspx` carrying `__CSRFCOOKIE`/`__CSRFTOKEN` with HTTP 302/500 response
+- `rules/idunno-anticsrf-cve-2026-131914/file_event.yml` - vulnerable DLL inventory match via 3 verified SHA-256 hashes (exposure detection, not malware detection)
+- `rules/idunno-anticsrf-cve-2026-131914/process_creation.yml` - `w3wp.exe` spawning a shell/script child (generic post-exploitation signal, low/medium confidence)
+
+**Sources:** [Mandiant advisory MNDT-2026-0048](https://github.com/mandiant/Vulnerability-Disclosures/blob/master/2026/MNDT-2026-0048.md) (primary), [The Hacker News](https://thehackernews.com/2026/11/hackers-exploit-critical-aspnet-anti.html), [zerohunt.ai technical writeup](https://zerohunt.ai/blog/cve-2026-131914-idunno-anticsrf-aspnet-rce/).
+
+**Caveat:** Mandiant published no attacker domains/IPs — these rules detect the exploitation technique and the vulnerable artifact itself, not attacker network infrastructure. No vendor patch exists; remediation is to remove the module entirely.
+
+### Webworm / NtMonitor VPN — modified SoftEther VPN Bridge campaign (Nov 2026)
+
+Rapid7 (moderate confidence) attributes a stealth-rebuilt SoftEther VPN Bridge binary, rebranded "NtMonitor VPN," to the China-aligned espionage group Webworm. No new malicious functionality was added — the rebuild exists purely to strip SoftEther's detection fingerprint (renamed endpoints, swapped watermark format, encrypted config, embedded resource archive) while posing as legitimate network-monitoring software. Only one public sample is known.
+
+- `rules/webworm-ntmonitor-softether-2026/process_creation.yml` - PE metadata match (`netcapa.exe` original filename, "Network Systems Solutions Inc." product/company strings)
+- `rules/webworm-ntmonitor-softether-2026/service_creation.yml` - `SEVPNBRIDGE` service install (correlation-only, low confidence)
+- `rules/webworm-ntmonitor-softether-2026/file_hash_and_config.yml` - known sample SHA-256 hashes + `setting.conf` encrypted-config filename
+- `rules/webworm-ntmonitor-softether-2026/proxy_http_paths.yml` - renamed tunnel endpoints `/update/alive.cgi`, `/update/picture.cgi`
+- `rules/webworm-ntmonitor-softether-2026/network_connection_c2.yml` - reported C2 IP (secondary-sourced)
+
+**Sources:** [Rapid7](https://www.rapid7.com/blog/post/tr-spying-on-governments-no-malware-custom-webworms-toolkit-softether-bridge) (primary), [The Hacker News](https://thehackernews.com/2026/11/webworm-suspected-of-modifying.html).
+
+**Caveat:** single known sample, moderate-confidence attribution. The C2 IP and two config-file hashes came from secondary outlets quoting Rapid7's IOC list (direct extraction from Rapid7's own blog was not possible this run) — treat those specific values with more caution than the directly-sourced sample hash and filename/metadata indicators. No attacker-registered domain was published.
 
 ### Cisco Expressway CVE-2026-76466 exploitation (Nov 2026)
 
