@@ -1,0 +1,30 @@
+title: Webworm NtMonitor SoftEther Bridge - SEVPNBRIDGE Service Installation
+id: 7d5637a6-a585-45a0-bef8-9084aad7f121
+status: experimental
+description: |
+    Detects installation of the SEVPNBRIDGE Windows service, the unchanged
+    (non-rebranded) service name used by the Webworm-attributed modified
+    SoftEther VPN Bridge ("NtMonitor VPN"). This is a weak, low-confidence
+    standalone indicator because a legitimate, unmodified SoftEther VPN
+    Bridge installation uses the same service name - use this rule as a
+    pivot/correlation point alongside the PE metadata or file hash rules,
+    not as a standalone high-confidence alert.
+references:
+    - https://www.rapid7.com/blog/post/tr-spying-on-governments-no-malware-custom-webworms-toolkit-softether-bridge
+    - https://thehackernews.com/2026/11/webworm-suspected-of-modifying.html
+author: MILO
+date: 2026-11-23
+tags:
+    - attack.persistence
+    - attack.t1543.003
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7045
+        ServiceName: 'SEVPNBRIDGE'
+    condition: selection
+falsepositives:
+    - Legitimate, unmodified SoftEther VPN Bridge deployments use this exact same service name - this rule alone cannot distinguish stock SoftEther from the Webworm-modified NtMonitor build; corroborate with the PE metadata (OriginalFileName/Product/Company) or known-hash rules before treating a hit as malicious
+level: low

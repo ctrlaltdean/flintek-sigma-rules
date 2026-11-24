@@ -1,0 +1,29 @@
+title: Webworm NtMonitor SoftEther Bridge - Renamed HTTP Handshake Paths
+id: 59b751c1-d718-489e-8436-f4cd293907d3
+status: experimental
+description: |
+    Detects HTTP requests to the renamed SoftEther VPN handshake endpoints
+    used by the Webworm-attributed NtMonitor VPN bridge build
+    (/update/alive.cgi and /update/picture.cgi, replacing stock SoftEther's
+    /vpnsvc/vpn.cgi and /vpnsvc/connect.cgi) to blend tunnel traffic in as
+    ordinary web application activity.
+references:
+    - https://www.rapid7.com/blog/post/tr-spying-on-governments-no-malware-custom-webworms-toolkit-softether-bridge
+    - https://thehackernews.com/2026/11/webworm-suspected-of-modifying.html
+author: MILO
+date: 2026-11-23
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - attack.t1090.001
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-uri|contains:
+            - '/update/alive.cgi'
+            - '/update/picture.cgi'
+    condition: selection
+falsepositives:
+    - These path names are generic enough (resemble ordinary web app update-checker or image endpoints) that a match alone, without corroborating host telemetry showing a SoftEther/NtMonitor process or the SEVPNBRIDGE service on the source host, is not conclusive - treat as a pivot point for investigation, not a standalone high-confidence alert
+level: medium

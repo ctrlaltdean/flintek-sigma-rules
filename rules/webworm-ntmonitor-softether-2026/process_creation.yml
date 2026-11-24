@@ -1,0 +1,35 @@
+title: Webworm NtMonitor SoftEther Bridge - PE Metadata Artifacts
+id: 26460b88-b70d-45da-9dad-c77a75be0879
+status: experimental
+description: |
+    Detects execution of the Webworm-attributed modified SoftEther VPN
+    Bridge ("NtMonitor VPN" / netcapa.exe) via its PE metadata: the
+    OriginalFileName and the fake "NtMonitor VPN" product name / "Network
+    Systems Solutions Inc." company name embedded in the executable's
+    version-info resource. (The PDB debug path string is also embedded in
+    the binary but is not reliably surfaced in process_creation telemetry -
+    detect it instead via a YARA/file-content scan of the binary.)
+references:
+    - https://www.rapid7.com/blog/post/tr-spying-on-governments-no-malware-custom-webworms-toolkit-softether-bridge
+    - https://thehackernews.com/2026/11/webworm-suspected-of-modifying.html
+author: MILO
+date: 2026-11-23
+tags:
+    - attack.defense-evasion
+    - attack.t1036.005
+    - attack.command-and-control
+    - attack.t1071
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_filename:
+        OriginalFileName: 'netcapa.exe'
+    selection_metadata:
+        Product|contains: 'NtMonitor VPN'
+    selection_company:
+        Company|contains: 'Network Systems Solutions Inc.'
+    condition: selection_filename or selection_metadata or selection_company
+falsepositives:
+    - Product/Company metadata fields are attacker-exclusive and unlikely to false-positive on their own, but only populate on EDR/Sysmon configurations that enrich process_creation events with PE version-info fields (e.g. Sysmon with FileVersionInformation or EDR-native equivalents) - confirm your telemetry source populates these fields before relying on this selection
+level: high

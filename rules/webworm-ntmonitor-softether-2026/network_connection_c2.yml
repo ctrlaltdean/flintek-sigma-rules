@@ -1,0 +1,29 @@
+title: Webworm NtMonitor SoftEther Bridge - Known C2/Cascade Destination
+id: edb1bd99-c4a4-4710-b903-c12af118bdb6
+status: experimental
+description: |
+    Detects outbound network connections to the one publicly known
+    command-and-control / network-cascade destination recovered from a
+    decrypted Webworm NtMonitor SoftEther VPN Bridge configuration
+    (AS20473, The Constant Company/Vultr). Rapid7 did not publish a domain
+    list for this tool - the VPN tunnel endpoint is attacker/deployment
+    configurable, so this single IP should not be treated as exhaustive.
+references:
+    - https://www.rapid7.com/blog/post/tr-spying-on-governments-no-malware-custom-webworms-toolkit-softether-bridge
+    - https://www.defenderdaily.com/stories/2026/11/webworm-rebuilt-softether-vpn-bridge
+    - https://www.spectrum.security/threats/webworm-softether-bridge
+author: MILO
+date: 2026-11-23
+tags:
+    - attack.command-and-control
+    - attack.t1071
+    - attack.t1599
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp: '216.238.108.22'
+    condition: selection
+falsepositives:
+    - AS20473 (The Constant Company/Vultr) is shared commodity hosting used by many unrelated legitimate services - this rule matches the specific reported IP only, not the ASN/CIDR, to limit false positives; the IP itself could still be reassigned or decommissioned by the hosting provider after this report, re-verify liveness before treating a hit as high confidence
+level: high
