@@ -1,0 +1,28 @@
+title: GL.iNet GoodCloud Backdoor - Lookalike Domain DNS Query
+id: a057c17a-6b99-4212-a800-dcaa25f5af7b
+status: experimental
+description: Detects DNS queries to gl-inet.top, a typosquat/lookalike domain for GL.iNet's real domain (gl-inet.com) that resolves to the dropper host 66.245.219.252 used in the November 2026 GoodCloud compromise (CSA-2026-01)
+references:
+    - https://www.gl-inet.com/blogs/blog/glinet-security-notice-2026-11-20
+    - https://github.com/RemoteToHome-io/gl-security-incident-2026
+    - https://forum.gl-inet.com/t/2026-11-20-gl-inet-security-notice-goodcloud-kvm-routers/73056/79
+author: MILO
+date: 2026-11-23
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+    - attack.resource-development
+    - attack.t1583.001
+logsource:
+    category: dns
+detection:
+    # Exact match for the bare domain, |endswith for subdomains - never a bare
+    # |contains on a domain string (false-positive substring matches).
+    selection_exact:
+        query: 'gl-inet.top'
+    selection_subdomain:
+        query|endswith: '.gl-inet.top'
+    condition: selection_exact or selection_subdomain
+falsepositives:
+    - None expected - this is an attacker-registered lookalike domain, distinct from GL.iNet's real gl-inet.com
+level: critical

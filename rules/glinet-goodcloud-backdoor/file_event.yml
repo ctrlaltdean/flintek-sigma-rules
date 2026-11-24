@@ -5,8 +5,10 @@ description: Detects file artifacts dropped or modified by malware installed via
 references:
     - https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/
     - https://ciomonitor.com/articles/hackers-breached-gl-inet-s-cloud-to-plant-router-and-kvm-malware
+    - https://github.com/RemoteToHome-io/gl-security-incident-2026
+    - https://forum.gl-inet.com/t/2026-11-20-gl-inet-security-notice-goodcloud-kvm-routers/73056/79
 author: MILO
-date: 2026-11-22
+date: 2026-11-23
 tags:
     - attack.persistence
     - attack.t1543
@@ -26,7 +28,20 @@ detection:
             - '/etc/init.d/urandom_seed'
             - '/usr/bin/netstat'
             - '/bin/netstat'
-    condition: selection_dropped or selection_modified
+    # KVM-specific marker files/overlay paths indicating an implant-tampered
+    # firmware overlay (exact paths, cased for Linux filesystem case-sensitivity).
+    selection_kvm_markers:
+        TargetFilename|cased:
+            - 'etc/glinet/.cache/gl-helper'
+            - 'etc/glinet/.cache/gb'
+            - 'etc/config/.gl/gl-helper'
+            - 'etc/config/.gl/gb'
+    # Named pipe artifact that persists until reboot even after the malicious
+    # shell process is killed.
+    selection_named_pipe:
+        TargetFilename: '/tmp/f'
+    condition: selection_dropped or selection_modified or selection_kvm_markers or selection_named_pipe
 falsepositives:
     - 'urandom_seed and netstat are legitimate stock files on OpenWrt-based firmware; this rule should fire on MODIFICATION/write events to these paths outside a firmware update process, not on their mere existence - tune to the source log''s change/write semantics'
+    - '/tmp/f as a named pipe is a generic path some legitimate scripts also use for FIFOs; corroborate with process/network indicators before treating alone as malicious'
 level: high

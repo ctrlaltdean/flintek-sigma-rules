@@ -1,0 +1,27 @@
+title: GL.iNet GoodCloud Backdoor - Dropper Stage HTTP Request
+id: 352c18ae-f265-40fa-94e2-eef734136481
+status: experimental
+description: Detects HTTP requests for the two dropper stages (shell-script installer ni.sh, binary payload n5) served from the CSA-2026-01 dropper host on TCP 8000, part of the November 2026 GL.iNet GoodCloud compromise
+references:
+    - https://github.com/RemoteToHome-io/gl-security-incident-2026
+    - https://forum.gl-inet.com/t/2026-11-20-gl-inet-security-notice-goodcloud-kvm-routers/73056/79
+    - https://github.com/admonstrator/glinet-csa-2026-01
+author: MILO
+date: 2026-11-23
+tags:
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: proxy
+detection:
+    selection_host:
+        c-uri-host: '66.245.219.252'
+        c-uri-port: 8000
+    selection_path:
+        c-uri-query|endswith:
+            - '/ni.sh'
+            - '/n5'
+    condition: selection_host and selection_path
+falsepositives:
+    - None expected - this host/port/path combination is attacker-exclusive infrastructure specific to this campaign
+level: critical
