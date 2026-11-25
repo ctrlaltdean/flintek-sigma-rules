@@ -1,0 +1,27 @@
+title: Volant Manticore KuboShell Homa Stager Hardcoded C2 IP
+id: c0265618-d432-42ec-ba98-cc7d93656e23
+status: experimental
+description: >
+  Detects outbound network connections to the hardcoded IP address used by the
+  Volant Manticore (Iran-aligned, MOIS-linked) Homa Framework PowerShell stager
+  to fetch its in-memory loader following initial KuboShell IPFS-backdoor access.
+references:
+  - https://research.checkpoint.com/2026/volant-manticore-flying-under-the-radar/
+  - https://thehackernews.com/2026/11/iran-aligned-volant-manticore-uses-ipfs.html
+author: MILO
+date: 2026-11-24
+tags:
+  - attack.command-and-control
+  - attack.t1071.001
+  - attack.t1105
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    DestinationIp: '185.205.187.109'
+    DestinationPort: 8000
+  condition: selection
+falsepositives:
+  - None expected; this literal IP:port pair is attacker-controlled Homa stager infrastructure, not shared/legitimate hosting per the reporting.
+level: high

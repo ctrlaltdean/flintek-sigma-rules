@@ -1,0 +1,29 @@
+title: Volant Manticore N-able RMM Downloader via medochomie Domain
+id: 2b8a20ca-a69d-468f-b5f1-6b7558ad4cec
+status: experimental
+description: >
+  Detects HTTP requests/proxy logs for the attacker-registered domain used by
+  Volant Manticore to distribute a trojanized N-able RMM installer script
+  (Install-Remotely.ps1) to Saudi healthcare-themed phishing victims.
+references:
+  - https://research.checkpoint.com/2026/volant-manticore-flying-under-the-radar/
+  - https://thehackernews.com/2026/11/iran-aligned-volant-manticore-uses-ipfs.html
+author: MILO
+date: 2026-11-24
+tags:
+  - attack.command-and-control
+  - attack.t1105
+  - attack.t1071.001
+logsource:
+  category: proxy
+detection:
+  selection_exact:
+    c-uri-host: 'remote.medochomie.com'
+  selection_subdomain:
+    c-uri-host|endswith: '.medochomie.com'
+  selection_path:
+    c-uri|contains: '/api/ClientDownloads/WindowsInstaller/'
+  condition: selection_exact or selection_subdomain or selection_path
+falsepositives:
+  - selection_path alone may match legitimate N-able RMM installer distribution if the org is a genuine N-able customer; combine with the domain match for high confidence.
+level: high

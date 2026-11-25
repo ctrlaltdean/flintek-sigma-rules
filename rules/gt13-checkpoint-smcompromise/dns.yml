@@ -1,0 +1,29 @@
+title: GT13 Check Point Server Intrusion Campaign - newpayapp.com Infrastructure
+id: 9eeaa06b-735f-4dc6-baff-acfde5fc7fc2
+status: experimental
+description: >
+  Detects DNS queries for the attacker-registered domain newpayapp[.]com and its
+  known subdomains, used by GT13 (GreyNoise-tracked, AI-assisted) to distribute
+  the "ZULT" Linux implant during its October-November 2026 intrusion campaign
+  against 22 organizations via compromised Check Point Security Management
+  Servers.
+references:
+  - https://www.greynoise.io/blog/check-point-security-management-servers-intrusion-campaign
+  - https://www.securityweek.com/check-point-security-management-servers-hacked-in-ai-assisted-campaign/
+author: MILO
+date: 2026-11-24
+tags:
+  - attack.command-and-control
+  - attack.t1071.001
+  - attack.t1105
+logsource:
+  category: dns
+detection:
+  selection_exact:
+    query: 'newpayapp.com'
+  selection_subdomain:
+    query|endswith: '.newpayapp.com'
+  condition: selection_exact or selection_subdomain
+falsepositives:
+  - None expected; newpayapp.com was registered 2026-03-13 specifically as GT13-controlled infrastructure per GreyNoise, not a repurposed legitimate service.
+level: high

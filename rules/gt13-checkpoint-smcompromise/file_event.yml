@@ -1,0 +1,28 @@
+title: GT13 Check Point Server Intrusion - Linux Persistence Artifacts
+id: a948312a-c82a-4b89-bcce-e2c09d703482
+status: experimental
+description: >
+  Detects creation of the ld.so.preload persistence entry and the associated
+  implant shared object observed on a GT13-compromised Linux HFS server used
+  as an operational relay ("hop") box in the Check Point Security Management
+  Server intrusion campaign (Oct-Nov 2026).
+references:
+  - https://www.greynoise.io/blog/check-point-security-management-servers-intrusion-campaign
+  - https://www.securityweek.com/check-point-security-management-servers-hacked-in-ai-assisted-campaign/
+author: MILO
+date: 2026-11-24
+tags:
+  - attack.persistence
+  - attack.t1574.006
+logsource:
+  category: file_event
+  product: linux
+detection:
+  selection:
+    TargetFilename|cased:
+      - '/etc/ld.so.preload'
+      - '/usr/lib/.libproc.so'
+  condition: selection
+falsepositives:
+  - /etc/ld.so.preload has legitimate uses (e.g. some monitoring/profiling agents); treat a write to it as high-priority triage, not automatic confirmation, and check the loaded library path against known-good software in your environment.
+level: high

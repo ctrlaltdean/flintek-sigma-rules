@@ -281,6 +281,29 @@ Unauthenticated root RCE in the clustered database service of Cisco Expressway-C
 
 **Caveat:** all technical IOCs trace to F6's single report (widely syndicated, not independently corroborated). Only one confirmed victim; treat the two IPs as tied to this specific incident, not a comprehensive list for the whole exploitation wave. No file hashes published for the staged scripts.
 
+### Volant Manticore — Iran-aligned KuboShell IPFS backdoor espionage campaign (Nov 2026)
+
+Check Point Research disclosed a previously undocumented MOIS-linked group targeting Cyprus (telecom, airlines, critical infrastructure) and, from Sept 2026, Saudi Arabia (healthcare), via phishing lures delivering an IPFS-based backdoor (KuboShell) and a MuddyC2Go-derived post-compromise framework (Homa).
+
+- `rules/volant-manticore/network_connection.yml` - hardcoded Homa stager C2 IP:port
+- `rules/volant-manticore/proxy.yml` - medochomie domain + N-able RMM installer path
+- `rules/volant-manticore/file_event.yml` - lure filenames and KuboShell artifact paths
+
+**Sources:** [Check Point Research](https://research.checkpoint.com/2026/volant-manticore-flying-under-the-radar/) (primary), [The Hacker News](https://thehackernews.com/2026/11/iran-aligned-volant-manticore-uses-ipfs.html), [Brandefense](https://brandefense.io/security-news/volant-manticore-campaign-cyprus-saudi).
+
+**Caveat:** single primary source for all technical IOCs; narrative corroboration only from secondary outlets. Attribution to MOIS/Iran is Check Point's own assessment. IPFS/Pinata are abused legitimate services, not attacker infrastructure — do not blocklist them.
+
+### GT13 — Check Point Security Management Server intrusion campaign (Oct-Nov 2026)
+
+GreyNoise (sensor-based, AI-assisted-campaign assessment) tracked an unattributed actor exploiting Rejetto HFS (CVE-2026-61500) and Check Point SmartConsole (CVE-2026-16232) to compromise 24 Check Point Security Management Servers across 22 organizations in 17 countries, using one victim as an operational relay.
+
+- `rules/gt13-checkpoint-smcompromise/dns.yml` - newpayapp.com and known subdomains
+- `rules/gt13-checkpoint-smcompromise/file_event.yml` - ld.so.preload persistence + implant .so path
+
+**Sources:** [GreyNoise](https://www.greynoise.io/blog/check-point-security-management-servers-intrusion-campaign) (primary), [SecurityWeek](https://www.securityweek.com/check-point-security-management-servers-hacked-in-ai-assisted-campaign/).
+
+**Caveat:** single primary source. ~70 IPs observed in the campaign are ExpressVPN egress nodes (shared VPN infrastructure, not attacker-owned) and were deliberately excluded as indicators. No file hashes were published for the "ZULT" implant (download failed in GreyNoise's observation window).
+
 ## License
 
 Apache 2.0
