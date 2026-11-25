@@ -1,0 +1,52 @@
+title: DNS Query to Inception/O-UNC-053 SSO Vishing Phishing Domains
+id: 6254450b-dfdd-480c-a5d5-d5eb8205dda4
+status: experimental
+description: |
+    Detects DNS queries to legal-themed lookalike domains confirmed by
+    ReversingLabs as hosting the SSO phishing kit used by the "Inception"
+    extortion brand (tracked by Okta as O-UNC-053, linked to ShinyHunters).
+    The campaign vishes employees, then directs them to these web-only
+    domains which mimic the target organization's Okta or NetIQ/OpenText
+    Access Manager sign-in page to harvest credentials and MFA codes.
+references:
+    - https://www.reversinglabs.com/blog/threat-researchers-notebook-sso-vishing-campaign-associated-with-emerging-inception-extortion-group
+    - https://www.bleepingcomputer.com/news/security/new-inception-extortion-gang-launches-large-scale-vishing-campaign
+    - https://www.infosecurity-magazine.com/news/inception-extortion-sso-vishing
+author: MILO
+date: 2026-11-25
+tags:
+    - attack.initial-access
+    - attack.t1566.004
+    - attack.credential-access
+    - attack.t1621
+logsource:
+    category: dns
+detection:
+    selection:
+        query:
+            - 'legal-duolingo.com'
+            - 'activisionblizzard-legal.com'
+            - 'legal-morningstar.com'
+            - 'legal-westernunion.com'
+            - 'legal-ea.com'
+            - 'legal-dropbox.com'
+            - 'legal-riotgames.com'
+            - 'legal-indeed.com'
+            - 'legal-creditkarma.com'
+            - 'legal-vrtx.com'
+            - 'legal-aexp.com'
+            - 'legal-expeditors.com'
+            - 'legal-twitch.tv'
+            - 'legal-lvmh.com'
+            - 'legal-amd.com'
+            - 'legal-carvana.com'
+            - 'legal-pepsico.com'
+            - 'legal-caesars.com'
+            - 'legal-rbi.com'
+            - 'legal-grubhub.com'
+            - 'legal-lucidmotors.com'
+    condition: selection
+falsepositives:
+    - Unknown. These are attacker-registered lookalike domains with no
+      legitimate purpose; any hit should be treated as a true positive.
+level: high

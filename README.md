@@ -304,6 +304,17 @@ GreyNoise (sensor-based, AI-assisted-campaign assessment) tracked an unattribute
 
 **Caveat:** single primary source. ~70 IPs observed in the campaign are ExpressVPN egress nodes (shared VPN infrastructure, not attacker-owned) and were deliberately excluded as indicators. No file hashes were published for the "ZULT" implant (download failed in GreyNoise's observation window).
 
+### Inception / O-UNC-053 — SSO vishing campaign (active since Oct 2026, reported Nov 23-25, 2026)
+
+A ShinyHunters-linked threat cluster (Okta's O-UNC-053) rebranded onto a new "Inception" extortion leak site and runs a large-scale voice-phishing (vishing) operation: operators call employees posing as IT support, walk them to a legal-themed lookalike domain mimicking the org's Okta/NetIQ sign-in page, and harvest SSO credentials plus MFA codes/pushes.
+
+- `rules/inception-sso-vishing/dns.yml` - DNS queries to 21 confirmed phishing-kit domains
+- `rules/inception-sso-vishing/proxy.yml` - HTTP(S) requests to the same 21 domains
+
+**Sources:** [ReversingLabs](https://www.reversinglabs.com/blog/threat-researchers-notebook-sso-vishing-campaign-associated-with-emerging-inception-extortion-group) (primary), [BleepingComputer](https://www.bleepingcomputer.com/news/security/new-inception-extortion-gang-launches-large-scale-vishing-campaign), [Infosecurity Magazine](https://www.infosecurity-magazine.com/news/inception-extortion-sso-vishing).
+
+**Caveat:** ReversingLabs attributes 41 more domains at high confidence and 4 at medium confidence via infra pivots, and Okta's own report cites "more than 70" domains overall, but neither has published those full lists — only the 21 confirmed here are in the rules. Leak-site victim claims (AMD, Cigna, Henry Schein, Paychex, PepsiCo, AutoZone, Lucid Motors) are unverified extortion claims, not confirmed breaches. Victims' own legitimate Okta tenants (e.g. amd.okta[.]com) are abused as camouflage redirects, not attacker infrastructure — do not blocklist them.
+
 ## License
 
 Apache 2.0
