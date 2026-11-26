@@ -1,0 +1,34 @@
+title: ARTEX Agentic AI Campaign - Malicious Domain DNS Query
+id: 7dd8e688-1459-42de-9eee-060e4e33d54b
+status: experimental
+description: |
+    Detects DNS queries to domains reported in connection with ARTEX-enabled or
+    ARTEX-adjacent campaigns. xcai[.]pro (LLM API reseller used by a South Korea
+    financial-sector actor) is single-sourced to CrowdStrike. nginxmysql[.]com
+    (BLOODALCHEMY C2) is single-sourced to Darktrace and tied only to a
+    moderate-confidence, China-nexus espionage assessment, not a named actor.
+    Both are experimental and should be validated against current resolution
+    status before enforcement.
+references:
+    - https://www.ic3.gov/CSA/2026/261113.pdf
+    - https://www.darktrace.com/blog/agentic-attacks-in-the-wild-inside-three-artex-investigations
+author: MILO
+date: 2026-11-25
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+logsource:
+    category: dns
+detection:
+    selection_exact:
+        query:
+            - 'xcai.pro'
+            - 'nginxmysql.com'
+    selection_subdomain:
+        query|endswith:
+            - '.xcai.pro'
+            - '.nginxmysql.com'
+    condition: selection_exact or selection_subdomain
+falsepositives:
+    - None expected - these are attacker-registered/attacker-associated domains, but both are single-sourced; confirm live resolution and context before acting
+level: high

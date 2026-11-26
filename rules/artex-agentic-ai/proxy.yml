@@ -1,0 +1,30 @@
+title: ARTEX Agentic AI Framework - Distinctive User-Agent Strings
+id: 15e53dae-1318-4e91-9098-4cd4d446592e
+status: experimental
+description: |
+    Detects HTTP requests carrying the artex-enrich or norma user-agent strings
+    that Microsoft documented as distinctive to ARTEX's own tooling: artex-enrich
+    is sent as a short, non-redirect-following GET to each newly discovered web
+    asset (title-only read); norma is used by requests made directly through the
+    agent's built-in web-fetch tool. Microsoft explicitly notes operators
+    frequently rotate these values to evade static detection, so absence does not
+    rule out ARTEX activity - pair with behavioral/volumetric detections.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/11/25/what-defenders-need-to-know-artex-agentic-ai-framework-threat-actors-abuse/
+    - https://elastic.co/security-labs/threat-command/agentic-offensive-frameworks-detection-artex
+author: MILO
+date: 2026-11-25
+tags:
+    - attack.reconnaissance
+    - attack.t1595.002
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-useragent|startswith:
+            - 'artex-enrich/'
+            - 'norma/'
+    condition: selection
+falsepositives:
+    - Operators commonly rotate/customize this user agent to evade signature-based detection, so true positives may be missed; low false positive risk when it does appear since the string is attacker-tool specific
+level: high

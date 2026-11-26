@@ -1,0 +1,45 @@
+title: ARTEX Agentic AI Framework - Web Server Spawning Shell (Web Shell Behavior)
+id: 1188f466-e6f1-4a28-a6f5-1a79e466a69a
+status: experimental
+description: |
+    Detects a web server process spawning a command shell, a pattern Microsoft
+    and the FBI both independently documented as a reliable post-exploitation
+    artifact of ARTEX-enabled intrusions: after exploiting a web application,
+    ARTEX agents upload JSP/PHP/ASPX web shells and use them to launch
+    interactive shells, often creating several short-lived shells with
+    incrementing names as the agent iterates past errors. This technique is not
+    unique to ARTEX; it is a long-documented web shell indicator, but it is the
+    specific system-level artifact both primary sources call out for this
+    campaign.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/11/25/what-defenders-need-to-know-artex-agentic-ai-framework-threat-actors-abuse/
+    - https://www.ic3.gov/CSA/2026/261113.pdf
+author: MILO
+date: 2026-11-25
+tags:
+    - attack.persistence
+    - attack.t1505.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith:
+            - '\w3wp.exe'
+            - '\php-cgi.exe'
+            - '\httpd.exe'
+            - '\apache.exe'
+            - '\tomcat.exe'
+            - '\java.exe'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\sh.exe'
+            - '\bash.exe'
+    condition: selection_parent and selection_child
+falsepositives:
+    - Legitimate web application functionality that intentionally shells out (rare, should be inventoried and allow-listed)
+    - Administrative scripts executed through a web management console
+level: high
