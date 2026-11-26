@@ -1,0 +1,35 @@
+title: Vates Xen Orchestra Auth-Bypass Attacker Infrastructure (VSA-2026-062 / CVE-2026-133469)
+id: 9058a437-eb81-4856-87d3-71ef97c9698a
+status: experimental
+description: |
+    Detects outbound network connections to the attacker infrastructure that
+    Vates confirmed is exploiting the Xen Orchestra authentication bypass flaw
+    VSA-2026-062 (CVE-2026-133469) in the wild as of November 2026: a VPS IP
+    flagged on VirusTotal as a RedLine Stealer C2 server, and a Tor hidden
+    service the same actor also used. A hit on this rule from a Xen Orchestra
+    or XCP-ng host indicates likely compromise, not just exposure.
+references:
+    - https://thehackernews.com/2026/11/hackers-exploit-critical-xen-orchestra.html
+    - https://bleepingcomputer.com/news/security/critical-xen-orchestra-auth-bypass-flaw-exploited-to-hijack-vm-servers
+    - https://docs.vates.tech/security-advisories/advisories/2026/vates-sa-2026-062/
+author: MILO
+date: 2026/11/26
+tags:
+    - attack.command-and-control
+    - attack.t1071
+    - attack.t1090.003
+logsource:
+    category: network_connection
+detection:
+    selection_ip:
+        DestinationIp: '91.211.251.112'
+        DestinationPort: 8001
+    selection_onion:
+        DestinationHostname:
+            - 'ustar3rqxgnskzgnwkgpofgtvxevm6cx3lxdbwt4mndtveqyaohid.onion'
+    selection_onion_sub:
+        DestinationHostname|endswith: '.ustar3rqxgnskzgnwkgpofgtvxevm6cx3lxdbwt4mndtveqyaohid.onion'
+    condition: selection_ip or selection_onion or selection_onion_sub
+falsepositives:
+    - None expected. This is not Vates' or Xen Orchestra's own infrastructure.
+level: critical

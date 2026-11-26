@@ -1,0 +1,42 @@
+title: NuGet Fake Job Assessment Campaign - osk.exe Side-Load Staging Files
+id: 1a86179e-edc5-482e-8b73-05795f2693f9
+status: experimental
+description: |
+    Detects file writes matching the DLL side-loading staging pattern used by the
+    November 2026 NuGet "fake job assessment" campaign: a copy of the legitimate
+    Windows On-Screen Keyboard (osk.exe) placed outside %WINDIR%\System32 next to
+    an attacker-controlled OskSupport.dll, or the WinUI.Button package's downloaded
+    second-stage executable saved as %TEMP%\Launcher.exe. osk.exe + osksupport.dll
+    is a publicly documented (HijackLibs) side-loading pair; its presence under
+    %LOCALAPPDATA%\osk is not legitimate Windows behavior.
+references:
+    - https://socket.dev/blog/malicious-nuget-packages-fake-job-assessments
+    - https://www.pk-sharma.com/briefing/socket-13-malicious-nuget-packages-fake-job-assessments
+author: MILO
+date: 2026/11/26
+tags:
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.t1574.001
+    - attack.t1105
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_osksupport:
+        TargetFilename|contains: '\osk\OskSupport.dll'
+    selection_osk_copy:
+        TargetFilename|contains|all|cased:
+            - '\osk\'
+            - 'osk.exe'
+    selection_launcher:
+        TargetFilename|endswith: '\Launcher.exe'
+        TargetFilename|contains: '\AppData\Local\Temp\'
+    filter_legit_system32:
+        TargetFilename|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\WINDOWS\System32\'
+    condition: (selection_osksupport or selection_osk_copy or selection_launcher) and not filter_legit_system32
+falsepositives:
+    - A legitimately named Launcher.exe from unrelated software dropped in %TEMP% (rare; review parent process).
+level: high

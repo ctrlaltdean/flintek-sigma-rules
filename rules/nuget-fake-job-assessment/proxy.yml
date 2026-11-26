@@ -1,0 +1,40 @@
+title: NuGet Fake Job Assessment Campaign - ClickFix Payload Fetch over HTTP
+id: 2b601758-b1f1-48a0-9cd9-177e4d89d28b
+status: experimental
+description: |
+    Detects HTTP(S) requests to the ClickFix payload host cloudservicebase.ddns.net
+    (and its known VPS IP, which has decayed and may no longer resolve) or to the
+    GitHub Pages ClickFix lure page hosted under the figma-share.github.io account,
+    used in the November 2026 NuGet "fake job assessment" campaign targeting .NET
+    developers. The payload path observed was /update/CVE-2026-44747_patch.dat,
+    a fake CVE-patch filename used as social-engineering cover.
+references:
+    - https://socket.dev/blog/malicious-nuget-packages-fake-job-assessments
+    - https://cyber.hendryadrian.com/article/20124/malicious-nuget-packages-use-fake-job-assessments-to-target-net-developers
+author: MILO
+date: 2026/11/26
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - attack.t1204.001
+logsource:
+    category: proxy
+detection:
+    selection_domain_exact:
+        c-uri-host: 'cloudservicebase.ddns.net'
+    selection_domain_subdomain:
+        c-uri-host|endswith: '.cloudservicebase.ddns.net'
+    selection_path:
+        c-uri|contains: '/update/CVE-2026-44747_patch.dat'
+    selection_clickfix_page_exact:
+        c-uri:
+            - 'figma-share.github.io'
+    selection_clickfix_page_sub:
+        c-uri|contains:
+            - '//figma-share.github.io/'
+            - '.figma-share.github.io/'
+    condition: selection_domain_exact or selection_domain_subdomain or selection_path or selection_clickfix_page_exact or selection_clickfix_page_sub
+falsepositives:
+    - None expected for the ddns.net host or the specific payload path.
+    - The figma-share.github.io GitHub Pages account may host unrelated pages; review hits before actioning.
+level: high

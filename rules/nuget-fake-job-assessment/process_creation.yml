@@ -1,0 +1,49 @@
+title: NuGet Fake Job Assessment Campaign - Hidden osk.exe or MSBuild Stager Execution
+id: 9ac614f1-c0bf-4958-8509-298f7f8b904f
+status: experimental
+description: |
+    Detects two execution behaviors from the November 2026 NuGet "fake job
+    assessment" campaign: (1) MSBuild/Visual Studio invoking dotnet.exe against a
+    DLL inside a NuGet package's lib folder named MSBuildAnalyzer.dll, the build-
+    time stager shipped by the malicious VS_Builder.MSBuildAnalyzer / HappyOne.
+    MSBuildAnalyzer packages; and (2) a side-loaded osk.exe started hidden
+    (CREATE_NO_WINDOW / hidden window style) by a .NET or WinUI application process
+    rather than the normal Ease of Access launch path (explorer.exe / utilman.exe /
+    user-initiated winlogon context).
+references:
+    - https://socket.dev/blog/malicious-nuget-packages-fake-job-assessments
+    - https://blog.gridinsoft.com/malicious-nuget-packages/
+author: MILO
+date: 2026/11/26
+tags:
+    - attack.execution
+    - attack.t1127.001
+    - attack.t1574.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_msbuild_stager:
+        ParentImage|endswith:
+            - '\MSBuild.exe'
+            - '\devenv.exe'
+        Image|endswith: '\dotnet.exe'
+        CommandLine|contains: 'MSBuildAnalyzer.dll'
+    selection_hidden_osk:
+        Image|endswith: '\osk.exe'
+        CommandLine|contains:
+            - 'Hidden'
+    filter_legit_parent:
+        ParentImage|endswith:
+            - '\explorer.exe'
+            - '\utilman.exe'
+            - '\winlogon.exe'
+    filter_legit_osk_path:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\WINDOWS\System32\'
+    condition: selection_msbuild_stager or (selection_hidden_osk and not filter_legit_parent and not filter_legit_osk_path)
+falsepositives:
+    - Legitimate MSBuild analyzer packages that spawn dotnet.exe on a DLL named similarly; verify against the known-malicious package list in the campaign vault note.
+    - Accessibility tooling or remote-support software that scripts osk.exe outside System32 (uncommon).
+level: high

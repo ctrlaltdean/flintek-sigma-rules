@@ -57,6 +57,31 @@ Chained PHP2Shell (CVE-2026-109618/109619) unauthenticated RCE with Fragnesia (C
 
 **Caveat:** a circulating domain list (`ad-track[.]live`, `cdn[.]gotoiphone[.]com`, etc.) from an f5.com bulletin was checked and excluded - it cites an unrelated CVE and a JNDI/EL-injection URL pattern that doesn't match this exploit chain; looks templated/misattributed.
 
+### NuGet fake job assessment campaign - .NET developer supply chain (Nov 2026)
+
+Unattributed operation (July-Nov 2026) hid malicious code in 13 NuGet packages and 6 npm packages distributed via fake Windows .NET take-home job assessments, staging an `osk.exe`/`OskSupport.dll` DLL side-load and a build-time MSBuild stager, plus a ClickFix lure hosted on GitHub Pages. Disclosed by Socket.
+
+- `rules/nuget-fake-job-assessment/dns.yml` - ClickFix payload host `cloudservicebase.ddns.net` (exact + subdomain)
+- `rules/nuget-fake-job-assessment/proxy.yml` - same host over HTTP, the ClickFix page on `figma-share.github.io`, and the fake-CVE-patch payload path
+- `rules/nuget-fake-job-assessment/file_event.yml` - `osk.exe`/`OskSupport.dll` written outside System32, `%TEMP%\Launcher.exe`
+- `rules/nuget-fake-job-assessment/process_creation.yml` - MSBuild-spawned stager execution, hidden `osk.exe` launch outside the normal Ease-of-Access path
+
+**Sources:** [Socket](https://socket.dev/blog/malicious-nuget-packages-fake-job-assessments), [Dark Reading](https://www.darkreading.com/threat-intelligence/attackers-net-developers-poisoned-job-assessments).
+
+**Caveat:** no victim count established; the ClickFix domain and its resolved VPS IP are a single point-in-time observation (Aug 29, 2026) and did not resolve during Socket's analysis - treat as possibly dormant/reactivated. Not attributed to a named actor.
+
+### Vates Xen Orchestra auth-bypass exploitation - VSA-2026-062 / CVE-2026-133469 (Nov 2026)
+
+Unauthenticated authentication-bypass flaw in Xen Orchestra/XCP-ng, actively exploited to forge admin sessions via a crafted empty-JSON-object auth token. Vates published concrete attacker infrastructure, added to CISA KEV Nov 25, 2026.
+
+- `rules/vates-xen-orchestra-vsa2026-062/network_connection.yml` - attacker VPS `91.211.251.112:8001` (flagged RedLine Stealer C2 on VirusTotal) and Tor onion C2
+- `rules/vates-xen-orchestra-vsa2026-062/webserver.yml` - the exact exploited auth-token cookie value (`j:%7B%7D` / `j:{}`)
+- `rules/vates-xen-orchestra-vsa2026-062/file_event.yml` - post-exploitation cron persistence and hidden root dotfiles (`zz-ustar*`, `.ustar5`, `.ustar6`)
+
+**Sources:** [The Hacker News](https://thehackernews.com/2026/11/hackers-exploit-critical-xen-orchestra.html), [BleepingComputer](https://bleepingcomputer.com/news/security/critical-xen-orchestra-auth-bypass-flaw-exploited-to-hijack-vm-servers), [Vates advisory VSA-2026-062](https://docs.vates.tech/security-advisories/advisories/2026/vates-sa-2026-062/).
+
+**Caveat:** IOC set is vendor-published (Vates) and propagated by news outlets rather than independently cross-verified by a second research team. The source IP has unrelated history as a RedLine Stealer C2, so it may be shared/rotated infrastructure.
+
 ### Cairn - MONAI Label university intrusions (Nov 20, 2026 disclosure)
 
 - `rules/cairn-monai-label/network_connection.yml` - exact match on two historical IPs, either endpoint

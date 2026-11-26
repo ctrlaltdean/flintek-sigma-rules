@@ -1,0 +1,31 @@
+title: NuGet Fake Job Assessment Campaign - ClickFix C2 Domain Resolution
+id: 48ffd01a-044e-4a9a-81ca-0b8a6395599b
+status: experimental
+description: |
+    Detects DNS resolution of cloudservicebase.ddns.net, the No-IP hostname used
+    by the November 2026 NuGet/npm "fake job assessment" campaign (13 malicious
+    NuGet packages, 6 npm packages) to host a ClickFix PowerShell payload served
+    from a GitHub Pages page (figma-share.github.io). The domain is a Dynamic DNS
+    hostname and is not known to serve any legitimate purpose.
+references:
+    - https://socket.dev/blog/malicious-nuget-packages-fake-job-assessments
+    - https://cyfar.ca/posts/13-malicious-nuget-packages-target-net-developers-with-fake-job-assessments
+    - https://www.darkreading.com/threat-intelligence/attackers-net-developers-poisoned-job-assessments
+author: MILO
+date: 2026/11/26
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - attack.t1583.001
+logsource:
+    category: dns
+    product: windows
+detection:
+    selection_exact:
+        query: 'cloudservicebase.ddns.net'
+    selection_subdomain:
+        query|endswith: '.cloudservicebase.ddns.net'
+    condition: selection_exact or selection_subdomain
+falsepositives:
+    - Unknown. Legitimate use of this dynamic DNS hostname has not been observed.
+level: high

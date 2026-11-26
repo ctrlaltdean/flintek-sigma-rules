@@ -1,0 +1,30 @@
+title: Vates Xen Orchestra Compromise - Post-Exploitation Persistence Artifacts (VSA-2026-062)
+id: 00cf1c21-c8fc-4ce4-be5d-34998dc5b7e2
+status: experimental
+description: |
+    Detects filesystem artifacts Vates observed on Xen Orchestra / XCP-ng dom0
+    hosts compromised via the VSA-2026-062 (CVE-2026-133469) authentication
+    bypass: attacker-planted cron persistence files named with the "ustar"
+    marker, and matching hidden dotfiles dropped at the filesystem root.
+references:
+    - https://bleepingcomputer.com/news/security/critical-xen-orchestra-auth-bypass-flaw-exploited-to-hijack-vm-servers
+author: MILO
+date: 2026/11/26
+tags:
+    - attack.persistence
+    - attack.t1053.003
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection_cron:
+        TargetFilename|contains:
+            - '/etc/cron.d/zz-ustar'
+    selection_hidden_root:
+        TargetFilename|cased:
+            - '/.ustar5'
+            - '/.ustar6'
+    condition: selection_cron or selection_hidden_root
+falsepositives:
+    - None expected. The "ustar" naming is specific to this campaign's cron job markers.
+level: critical

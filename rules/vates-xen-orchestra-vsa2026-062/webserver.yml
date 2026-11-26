@@ -1,0 +1,28 @@
+title: Vates Xen Orchestra Auth-Bypass Exploit Attempt via Empty Token Cookie (VSA-2026-062)
+id: 0dba5bb4-f74e-45e7-8283-a6bfa143fa11
+status: experimental
+description: |
+    Detects the exact exploitation pattern Vates documented for the Xen
+    Orchestra authentication bypass VSA-2026-062 (CVE-2026-133469): an HTTP
+    request carrying an authenticationToken cookie/parameter set to an empty
+    JSON object, which the vulnerable code accepts as a valid admin session
+    token. This is the published exploit signature, not a generic auth field.
+references:
+    - https://bleepingcomputer.com/news/security/critical-xen-orchestra-auth-bypass-flaw-exploited-to-hijack-vm-servers
+    - https://docs.vates.tech/security-advisories/advisories/2026/vates-sa-2026-062/
+author: MILO
+date: 2026/11/26
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    selection_encoded:
+        cs-cookie|contains: 'authenticationToken=j:%7B%7D'
+    selection_literal:
+        cs-cookie|contains: 'authenticationToken=j:{}'
+    condition: selection_encoded or selection_literal
+falsepositives:
+    - None expected. An empty JSON object is never a legitimate authentication token value.
+level: critical
