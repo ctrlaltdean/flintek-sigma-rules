@@ -19,6 +19,44 @@ Rules here are mostly researched and drafted by AI (open-source threat reporting
 
 ## Incidents covered
 
+### ARTEX agentic AI offensive framework - multi-actor campaign (Oct-Nov 2026)
+
+Multiple actors (Storm-0940, Storm-3358, Onyx Sleet, Pearl Sleet, Crystal Typhoon, Salt Typhoon) abusing ARTEX, an autonomous AI pentesting/offensive framework, per FBI FLASH and Microsoft reporting. Supplements the earlier `connectwise-skykick-artex` entry below with broader multi-actor C2/DNS/proxy indicators.
+
+- `rules/artex-agentic-ai/network_connection.yml` - C2/server IPs (Storm-3358, South Korea financial campaign), split by confidence
+- `rules/artex-agentic-ai/dns.yml` - `xcai.pro`, `nginxmysql.com` (exact + subdomain)
+- `rules/artex-agentic-ai/proxy.yml` - `artex-enrich/*` and `norma/*` user-agent strings
+- `rules/artex-agentic-ai/process_creation.yml` - web server process spawning a shell (webshell behavioral artifact)
+
+**Sources:** [FBI FLASH](https://www.ic3.gov/CSA/2026/261113.pdf), [Microsoft](https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/), [Mandiant/GTIG](https://cloud.google.com/blog/topics/threat-intelligence/artex-and-friends-enter-agentic-offensive-frameworks).
+
+**Caveat:** several IOCs (WISP C2 nodes, South Korea proxy IPs, `xcai.pro`, `nginxmysql.com`) are single-sourced, marked low-confidence in rule descriptions. A previously circulated `aar.gandhibludtric[.]com` lead was checked and excluded - it belongs to an unrelated, older Darktrace article with no ARTEX connection.
+
+### GT13 - Check Point Security Management Server intrusion campaign (Nov 2026)
+
+Two rule folders cover overlapping aspects of this campaign from separate research passes: `gt13-checkpoint-smcompromise` (earlier, DNS-focused) and `gt13-checkpoint-hfs` (this pass, host-based). Not yet deduplicated into one.
+
+- `rules/gt13-checkpoint-hfs/file_event_persistence.yml` - `/etc/ld.so.preload` + `/usr/lib/.libproc.so` persistence artifact
+- `rules/gt13-checkpoint-hfs/process_creation_attacker_tooling.yml` - named attacker scripts (comb.py, ssh_comb.py, ssh_spray.py, spray_portal.py, exploit.py)
+- `rules/gt13-checkpoint-hfs/file_event_ssh_authorized_keys.yml` - SSH key appended to `/root/.ssh/authorized_keys`
+
+**Sources:** [GreyNoise](https://www.greynoise.io/blog/check-point-security-management-servers-intrusion-campaign), [Cloud Security Alliance](https://labs.cloudsecurityalliance.org/research/csa-research-note-gt13-ai-driven-checkpoint-management-compr/).
+
+**Caveat:** attacker source IPs were deliberately excluded as indicators - they're ExpressVPN egress nodes or already-compromised victim devices, not attacker-owned infrastructure.
+
+### PAN-OS Fragnesia + PHP2Shell root chain (Nov 2026, 25 firewalls rooted)
+
+Chained PHP2Shell (CVE-2026-109618/109619) unauthenticated RCE with Fragnesia (CVE-2026-46300) Linux kernel LPE to root PAN-OS management interfaces exposed to the internet. Attributed by Unit42 to CL-UNK-1280 (China-nexus).
+
+- `rules/panos-fragnesia-php2shell/network_connection.yml` - attacker VPS 130.94.67[.]235 (AS154177, Tokyo), ports 8080/23522
+- `rules/panos-fragnesia-php2shell/file_event.yml` - `/unauth/php/change_password.php` webshell path, `.panops` persistence dir
+- `rules/panos-fragnesia-php2shell/process_creation.yml` - web-server account invoking `su`, `iox` tunnel binary execution
+- `rules/panos-fragnesia-php2shell/webserver.yml` - oversized multipart POST signature of the PHP2Shell exploit request
+
+**Sources:** [Palo Alto Networks advisory PAN-SA-2026-0015](https://security.paloaltonetworks.com/PAN-SA-2026-0015), [hunt.io](https://hunt.io/blog/inside-the-php2shell-arsenal), [threadlinqs](https://intel.threadlinqs.com/threat/TL-2026-6841).
+
+**Caveat:** a circulating domain list (`ad-track[.]live`, `cdn[.]gotoiphone[.]com`, etc.) from an f5.com bulletin was checked and excluded - it cites an unrelated CVE and a JNDI/EL-injection URL pattern that doesn't match this exploit chain; looks templated/misattributed.
+
 ### Cairn - MONAI Label university intrusions (Nov 20, 2026 disclosure)
 
 - `rules/cairn-monai-label/network_connection.yml` - exact match on two historical IPs, either endpoint
