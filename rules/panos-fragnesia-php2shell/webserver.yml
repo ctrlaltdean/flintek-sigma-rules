@@ -1,0 +1,34 @@
+title: PAN-OS Fragnesia PHP2Shell - Oversized Multipart POST to Management Interface
+id: f98e6c1d-4460-46c1-b341-32bf409bf162
+status: experimental
+description: |
+    Detects the network/HTTP signature of the PHP2Shell (CVE-2026-109618 /
+    CVE-2026-109619) exploitation request itself: an oversized multipart/
+    form-data POST (hundreds of MB, oversized filenames) sent to the PAN-OS
+    management web interface (appweb), which drives the session.upload_progress
+    heap-corruption primitive used to gain unauthenticated RCE as 'nobody'
+    before the Fragnesia kernel privilege escalation. All four exploit stages
+    execute within a single such request.
+references:
+    - https://securityboulevard.com/2026/11/php2shell-a-network-edge-risk-playbook
+    - https://hunt.io/blog/inside-the-php2shell-arsenal
+    - https://security.paloaltonetworks.com/PAN-SA-2026-0015
+author: MILO
+date: 2026-11-25
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-method: 'POST'
+        cs-uri-stem|contains: 'change_password.php'
+    selection_large_body:
+        cs-bytes|gt: 100000000
+    condition: selection and selection_large_body
+falsepositives:
+    - Legitimate large uploads to this endpoint are not expected - the
+      change_password.php management function has no legitimate reason to
+      receive a 100MB+ request body
+level: high

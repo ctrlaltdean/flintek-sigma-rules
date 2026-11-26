@@ -1,0 +1,52 @@
+title: PAN-OS Fragnesia PHP2Shell - Web Server Account Invoking su or iox Tunnel
+id: e57181e0-8404-4dd9-b0c5-4f14e0cf432b
+status: experimental
+description: |
+    Detects the key behavioral signature of the Fragnesia (CVE-2026-46300)
+    privilege-escalation step: a web-server service account (nobody, www-data,
+    apache, httpd, nginx) successfully invoking su after the attacker's
+    page-cache overwrite of /etc/pam.d/su to pam_permit.so. Because the
+    kernel-level page-cache modification is memory-only, file-integrity
+    monitoring will not catch it - process execution telemetry is the
+    reliable detection surface here. Also detects execution of the iox
+    tunneling binary used for the reverse SSH/SOCKS5 persistence channel.
+references:
+    - https://intel.threadlinqs.com/threat/TL-2026-6841
+    - https://threataft.com/articles/palo-alto-panos-fragnesia-php2shell-root-chain
+    - https://hunt.io/blog/inside-the-php2shell-arsenal
+author: MILO
+date: 2026-11-25
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+    - attack.command-and-control
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_su_by_webuser:
+        Image|cased|endswith: '/su'
+        ParentUser:
+            - 'nobody'
+            - 'www-data'
+            - 'apache'
+            - 'httpd'
+            - 'nginx'
+    selection_iox:
+        Image|endswith:
+            - '/iox'
+            - '\iox.exe'
+        CommandLine|contains:
+            - 'tun.sh'
+            - 'proxy'
+            - 'socks'
+    condition: selection_su_by_webuser or selection_iox
+falsepositives:
+    - Some legitimate automation may run su from a service account in
+      unusual environments - confirm this is not an expected administrative
+      pattern before escalating, but on PAN-OS appliances specifically this
+      should never occur from the web server account
+    - iox has no known legitimate deployment on PAN-OS appliances; false
+      positives not expected on that logsource
+level: high

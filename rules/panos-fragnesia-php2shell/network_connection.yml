@@ -1,0 +1,37 @@
+title: PAN-OS Fragnesia PHP2Shell - Reverse Tunnel to Attacker VPS
+id: ba614c02-e2b2-4328-b85d-3d2abbe4a165
+status: experimental
+description: |
+    Detects outbound network connections from a PAN-OS appliance or its
+    underlying Linux host to the attacker-operated VPS identified by hunt.io's
+    AttackCapture open-directory analysis of the PAN-OS Fragnesia + PHP2Shell
+    root chain (CVE-2026-109618/109619 + CVE-2026-46300). The VPS hosts the
+    exploit toolkit (port 8080) and the 'aiscan' AI offensive platform (port
+    23522), and receives reverse SSH tunnels from rooted firewalls.
+references:
+    - https://hunt.io/blog/inside-the-php2shell-arsenal
+    - https://hunt.io/blog/php2shell-honeypot-shells-root-palo-alto-firewalls
+    - https://intel.threadlinqs.com/threat/TL-2026-6841
+    - https://security.paloaltonetworks.com/PAN-SA-2026-0015
+author: MILO
+date: 2026-11-25
+tags:
+    - attack.command-and-control
+    - attack.t1572
+    - attack.persistence
+    - attack.t1133
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp: '130.94.67.235'
+    selection_ports:
+        DestinationPort:
+            - 8080
+            - 23522
+    condition: selection and selection_ports
+falsepositives:
+    - None expected - this is a single attacker-operated VPS, not shared cloud
+      IP space; any connection on these specific ports to this specific IP
+      warrants investigation
+level: critical

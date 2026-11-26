@@ -1,0 +1,45 @@
+title: PAN-OS Fragnesia PHP2Shell - Webshell and Persistence File Artifacts
+id: 57876b27-f106-4871-8576-25066eb0c52a
+status: experimental
+description: |
+    Detects file-system artifacts of the PAN-OS Fragnesia + PHP2Shell root
+    chain: the root-command-relay webshell planted over the legitimate
+    change_password.php management endpoint, and the .panops persistence
+    directory used to stage SSH keys, SOCKS5 proxy and reverse-tunnel scripts.
+    PAN-OS ships a legitimate ~103-byte file at the change_password.php path -
+    this rule alerts on file creation/modification events at that path, which
+    should be investigated by checking size/hash drift from the known-good
+    baseline, not treated as inherently malicious on path alone.
+references:
+    - https://intel.threadlinqs.com/threat/TL-2026-6841
+    - https://hunt.io/blog/inside-the-php2shell-arsenal
+    - https://securityboulevard.com/2026/11/php2shell-a-network-edge-risk-playbook
+author: MILO
+date: 2026-11-25
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.defense-evasion
+    - attack.t1601
+logsource:
+    category: file_event
+detection:
+    selection_webshell:
+        TargetFilename|cased: '/unauth/php/change_password.php'
+    selection_persist_dir:
+        TargetFilename|cased|startswith: '/usr/local/lib/.panops/'
+    selection_rc_marker:
+        TargetFilename|cased:
+            - '/etc/rc.local'
+            - '/etc/rc.d/rc.local'
+    selection_systemd_unit:
+        TargetFilename|cased|endswith: '/pan-ops-init.service'
+    condition: selection_webshell or selection_persist_dir or selection_rc_marker or selection_systemd_unit
+falsepositives:
+    - change_password.php modification could be a legitimate PAN-OS software
+      update touching that file - verify against vendor release notes and
+      check for the PANOPSHELL marker string / unexpected file size before
+      escalating
+    - rc.local modification could be legitimate local administration - check
+      content for the PANOPSHELL marker string specifically
+level: high
