@@ -1,0 +1,37 @@
+title: GT13 HFS Hop Box - SSH Key Added to Root authorized_keys
+id: da3f0b89-681f-4e73-ad20-93275ff7ce11
+status: experimental
+description: >
+  Detects writes to /root/.ssh/authorized_keys, matching the GT13 actor's
+  observed post-exploitation step of appending an SSH key to the root
+  account's authorized_keys on an internet-exposed Rejetto HTTP File Server
+  (HFS) after forging an admin session cookie via CVE-2026-61500, to
+  maintain durable access to the compromised relay/"hop" host used during
+  the Check Point Security Management Server intrusion campaign
+  (Oct 17-Nov 2 2026).
+references:
+  - https://www.greynoise.io/blog/check-point-security-management-servers-intrusion-campaign
+  - https://labs.cloudsecurityalliance.org/research/csa-research-note-gt13-ai-driven-checkpoint-management-compr/
+  - https://www.bleepingcomputer.com/news/security/hackers-compromise-check-point-servers-in-22-organizations/
+author: MILO
+date: 2026-11-25
+tags:
+  - attack.persistence
+  - attack.t1098.004
+logsource:
+  category: file_event
+  product: linux
+detection:
+  selection:
+    TargetFilename|cased:
+      - '/root/.ssh/authorized_keys'
+  condition: selection
+falsepositives:
+  - Legitimate administrative SSH key rotation/provisioning (e.g. config
+    management, cloud-init, onboarding) also writes this file; treat as high
+    priority on internet-exposed file-server/application hosts that should
+    not normally receive new root SSH keys, and correlate with unexpected
+    process ancestry (e.g. an HFS/web server process writing to root's SSH
+    directory) rather than alerting on the path alone in environments with
+    routine key rotation.
+level: high

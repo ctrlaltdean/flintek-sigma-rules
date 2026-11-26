@@ -1,0 +1,38 @@
+title: GT13 HFS Hop Box - ld.so.preload Implant Persistence Artifact
+id: 0b55df7c-0550-473f-9cbf-d0683e4a2864
+status: experimental
+description: >
+  Detects creation or modification of /etc/ld.so.preload referencing the
+  /usr/lib/.libproc.so implant artifact observed on a Rejetto HTTP File
+  Server (HFS) compromised and used as an operational relay/"hop" box during
+  the GT13 (GreyNoise-tracked) intrusion campaign against Check Point
+  Security Management Servers (Oct 17-Nov 2 2026). A preload-failure artifact
+  for this path was logged as a possible implant persistence indicator by
+  GreyNoise and corroborated by CSA.
+references:
+  - https://www.greynoise.io/blog/check-point-security-management-servers-intrusion-campaign
+  - https://labs.cloudsecurityalliance.org/research/csa-research-note-gt13-ai-driven-checkpoint-management-compr/
+  - https://www.securityweek.com/check-point-security-management-servers-hacked-in-ai-assisted-campaign/
+author: MILO
+date: 2026-11-25
+tags:
+  - attack.persistence
+  - attack.t1574.006
+logsource:
+  category: file_event
+  product: linux
+detection:
+  selection_preload_conf:
+    TargetFilename|cased:
+      - '/etc/ld.so.preload'
+  selection_implant_lib:
+    TargetFilename|cased:
+      - '/usr/lib/.libproc.so'
+  condition: selection_preload_conf or selection_implant_lib
+falsepositives:
+  - Some legitimate monitoring/profiling/security agents use /etc/ld.so.preload
+    for library injection; verify the referenced library path against known-good
+    software before treating as confirmed compromise. A hidden dotfile shared
+    object (.libproc.so) under /usr/lib is itself atypical and should raise
+    priority.
+level: high

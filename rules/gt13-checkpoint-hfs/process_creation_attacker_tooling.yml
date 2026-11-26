@@ -1,0 +1,45 @@
+title: GT13 HFS Hop Box - Named Attacker Tooling Script Execution
+id: eeaf39bc-ae53-4ed3-9623-98b2ff847653
+status: experimental
+description: >
+  Detects execution of Python scripts with filenames matching the specific
+  attacker-authored tooling observed on a Rejetto HFS server compromised and
+  used as an operational relay in the GT13 Check Point Security Management
+  Server intrusion campaign (Oct 17-Nov 2 2026): comb.py, ssh_comb.py,
+  ssh_spray.py, spray_portal.py, and exploit.py (an adaptation of a
+  Metasploit module for CVE-2026-16232, the Check Point SmartConsole auth
+  bypass). These exact filenames in combination are a distinctive signature
+  of this actor's toolkit, not generic script activity.
+references:
+  - https://www.greynoise.io/blog/check-point-security-management-servers-intrusion-campaign
+  - https://labs.cloudsecurityalliance.org/research/csa-research-note-gt13-ai-driven-checkpoint-management-compr/
+author: MILO
+date: 2026-11-25
+tags:
+  - attack.execution
+  - attack.t1059.006
+  - attack.t1588.002
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_interpreter:
+    Image|endswith:
+      - '/python'
+      - '/python3'
+  selection_script:
+    CommandLine|contains:
+      - 'comb.py'
+      - 'ssh_comb.py'
+      - 'ssh_spray.py'
+      - 'spray_portal.py'
+      - 'exploit.py'
+  condition: selection_interpreter and selection_script
+falsepositives:
+  - exploit.py and comb.py are generic enough filenames that legitimate internal
+    tooling or security research scripts could coincidentally share a name;
+    corroborate with host context (internet-facing file-server role, presence
+    of the ld.so.preload persistence artifact, unexpected SSH key additions)
+    before escalating on exploit.py alone. ssh_comb.py, ssh_spray.py, and
+    spray_portal.py are more distinctive and lower false-positive risk.
+level: medium
