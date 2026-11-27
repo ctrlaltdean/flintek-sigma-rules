@@ -1,0 +1,40 @@
+title: PolinRider Worm - Persistence and Fake Camera Driver File Artifacts
+id: 05a56722-8924-45cd-ae19-d2e713a530dd
+status: experimental
+description: |
+    Detects creation of PolinRider persistence files (npm-ws shim, patched
+    editor/Discord/GitHub Desktop startup shims, commit-rewrite scripts) and
+    the fake "camera driver" installers used by the AccuraSoftHire recruiter lure.
+references:
+    - https://threatdefence.com/article/polinrider-north-korea-github-npm-malware-hunting
+author: MILO
+date: 2026-11-26
+tags:
+    - attack.persistence
+    - attack.t1554
+detection:
+    selection_persistence:
+        TargetFilename|endswith:
+            - '\.npm-ws-runner.js'
+            - '\.npm-ws.json'
+            - '\.npm-ws.pid'
+            - '.inz.cjs'
+            - '.inz.orig'
+    selection_scripts:
+        TargetFilename|endswith:
+            - '\temp_auto_push.bat'
+            - '\temp_interactive_push.bat'
+            - '\branch_structure.json'
+    selection_camera_driver:
+        TargetFilename|endswith:
+            - '\CameraDriverUpdate.msi'
+            - '\CameraDriverUpdate-mac.zip'
+            - '\CameraDriverUpdate.deb'
+    condition: 1 of selection_*
+logsource:
+    category: file_event
+falsepositives:
+    - '.inz.cjs/.inz.orig suffixes are unusual enough that false positives are
+      unlikely, but verify against the parent process (editor/Discord/GitHub
+      Desktop) before escalating.'
+level: high

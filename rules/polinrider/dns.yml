@@ -1,0 +1,45 @@
+title: PolinRider Worm - Fake Recruiter and Loader Download Domain Query
+id: e6093576-4ffe-4617-9967-cf91ede96d01
+status: experimental
+description: |
+    Detects DNS queries for PolinRider fake-job-recruiter phishing domains
+    (AccuraSoftHire, HuntRole) and the Vercel-hosted VS Code auto-run task
+    download hosts. The Vercel subdomains are matched as exact hostnames only
+    - vercel.app is a shared legitimate hosting platform and must never be
+    blocklisted by suffix.
+references:
+    - https://threatdefence.com/article/polinrider-north-korea-github-npm-malware-hunting
+author: MILO
+date: 2026-11-26
+tags:
+    - attack.initial-access
+    - attack.t1566
+detection:
+    selection_recruiter_exact:
+        query:
+            - 'accurasofthire.com'
+            - 'huntrole.org'
+            - 'huntrole.com'
+    selection_recruiter_sub:
+        query|endswith:
+            - '.accurasofthire.com'
+            - '.huntrole.org'
+            - '.huntrole.com'
+    selection_vercel_exact:
+        query:
+            - 'vscode-settings-bootstrap.vercel.app'
+            - 'vscode-settings-config.vercel.app'
+            - 'vscode-bootstrapper.vercel.app'
+            - 'vscode-load-config.vercel.app'
+            - 'default-configuration.vercel.app'
+            - '260120.vercel.app'
+    condition: 1 of selection_*
+logsource:
+    category: dns
+falsepositives:
+    - None expected for the recruiter domains (dedicated phishing infra).
+    - The Vercel hostnames are exact full-hostname matches against a shared
+      platform - do not generalize this rule to match on the vercel.app
+      suffix, which would cause massive false positives against legitimate
+      Vercel-hosted sites.
+level: high

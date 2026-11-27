@@ -1,0 +1,32 @@
+title: PolinRider Worm - Known Malicious File Hash
+id: d4902e70-046f-4d8b-8bd3-5ea6d405ef30
+status: experimental
+description: |
+    Detects known SHA-256 file hashes for PolinRider loader/stealer components
+    and fake-font payloads from the Nov 2026 update of the campaign (Ethereum-
+    wallet C2 lookup era). Distinct sample set from the separate, earlier
+    GhostAction-note PolinRider co-infection hash rule - do not assume overlap.
+references:
+    - https://threatdefence.com/article/polinrider-north-korea-github-npm-malware-hunting
+author: MILO
+date: 2026-11-26
+tags:
+    - attack.execution
+detection:
+    selection:
+        Hashes|contains:
+            - '45f1e5c405d1253b0014a17619581d31e1b94fdca8733519d84b9795a460f53a'
+            - 'adf94e02b0dea9efbf0c02c522fd39d7b833adc41067e747c3eb0843e36a1f91'
+            - 'b02a81974810532fff8f76903e09b20431857bfaff00f2473421f4a4fb8162b5'
+            - '3ae470cabb9412bf5f0e64e1f71b458e14eb10b19070845597d5b8230b27d552'
+            - '1a21bad1df69b51efebfd2fae849ac27722b0dfac7b1cb459cf81d38b36f9705'
+            - '3bf784a4857b20260a15f317d4b2534c3823ff9d5b13fe44e135676b11d43ebb'
+            - '8252068e04cad13c326fb7b833c4db8f45522a52984b7315c089b8b914babce1'
+            - '9e842de8444b8513cd93e654c913297e1a84237a21a52d511c12a96a824f44a5'
+            - '26761cc3bc24fde4aaf89fc0fc3cf8fbfb7bfb5e4961e85cf3c9f9e7732174bd'
+    condition: selection
+logsource:
+    category: file_event
+falsepositives:
+    - None expected for exact hash matches.
+level: critical

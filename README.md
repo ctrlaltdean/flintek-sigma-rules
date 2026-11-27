@@ -19,6 +19,42 @@ Rules here are mostly researched and drafted by AI (open-source threat reporting
 
 ## Incidents covered
 
+### PolinRider - DPRK GitHub supply chain worm, Nov 2026 update
+
+Self-spreading worm that steals a developer's Git/GitHub credentials and uses
+them to force-push its loader into every repo the victim can write to. Named by
+OpenSourceMalware in March 2026 (unconfirmed DPRK/Lazarus attribution). This
+entry covers the Nov 2026 update: C2 server moved to a new IP on Nov 25, 2026,
+plus a fresh npm poisoning wave and new recruiter-phishing/VS Code auto-run
+domains.
+
+- `rules/polinrider/network_connection.yml` - 21 rented C2 server IPs, dated by active window
+- `rules/polinrider/dns.yml` - recruiter phishing domains (AccuraSoftHire, HuntRole) + exact-match Vercel-hosted download hosts
+- `rules/polinrider/filehash.yml` - 9 SHA-256 hashes (loader, stealer, fake fonts, extension package)
+- `rules/polinrider/file_event.yml` - persistence filenames and fake camera-driver installers
+
+**Sources:** [ThreatDefence](https://threatdefence.com/article/polinrider-north-korea-github-npm-malware-hunting), [Apiiro](https://apiiro.com/blog/polinrider-north-korea-worm-forged-github-commits), [OpenSourceMalware](https://github.com/OpenSourceMalware/PolinRider), [Socket.dev](https://socket.dev/blog/polinrider-github-packagist).
+
+**Caveat:** attribution to DPRK is a working hypothesis (OpenSourceMalware/Socket), not government-confirmed. C2 IPs are rented hosting that rotates every 1-3 weeks - match against the dated active window, not as a static blocklist. This is a related but distinct campaign from the PolinRider hash rule already in the `ghostaction` entry below (different sample set, different research pass) - do not assume the two overlap.
+
+### SYS010 - SYS01 malvertising reload targeting Meta Business accounts (Nov 2026)
+
+Second major version of the SYS01 Facebook/Meta credential-theft campaign.
+Meta ads for fake "Wallpaper Engine"/"Live Wallpapers" apps deliver a PHP
+loader that forces Chrome/Firefox/Edge to install a malicious extension via
+abused enterprise browser-management features (Google admin console
+enrollment, Firefox ExtensionSettings policy, Windows MDM enrollment). The
+Chrome extension can also read and permanently delete Gmail/Outlook messages
+to hide MFA codes and account-takeover alerts.
+
+- `rules/sys010/dns.yml` - 22 attacker domains across hosting/loader-C2/installer-C2/extension-C2 tiers
+- `rules/sys010/filehash.yml` - 5 SHA-256 hashes (decoy ZIPs, Chrome/Firefox extension packages)
+- `rules/sys010/process_creation.yml` - PHP loader scheduled-task execution (wscript.exe/php.vbs, php.exe/bootstrap.php or base.php)
+
+**Sources:** [Bitdefender Labs](https://www.bitdefender.com/en-us/blog/labs/sys010-reloaded-malvertising-campaign-targeting-meta-business-accounts), [BleepingComputer](https://www.bleepingcomputer.com/news/security/sys010-malware-abuses-browser-management-to-spy-on-gmail-outlook/).
+
+**Caveat:** single primary source (Bitdefender's own research); other outlets re-report the same findings rather than independently verifying the IOCs. All domains are exact-match attacker infrastructure, not shared hosting - no subdomain wildcarding was needed or used.
+
 ### ARTEX agentic AI offensive framework - multi-actor campaign (Oct-Nov 2026)
 
 Multiple actors (Storm-0940, Storm-3358, Onyx Sleet, Pearl Sleet, Crystal Typhoon, Salt Typhoon) abusing ARTEX, an autonomous AI pentesting/offensive framework, per FBI FLASH and Microsoft reporting. Supplements the earlier `connectwise-skykick-artex` entry below with broader multi-actor C2/DNS/proxy indicators.

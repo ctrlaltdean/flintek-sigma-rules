@@ -1,0 +1,38 @@
+title: SYS010 Malvertising - PHP Loader Persistence Task Execution
+id: b418be60-29fa-4d75-b447-9056bd7835a1
+status: experimental
+description: |
+    Detects execution of the SYS010 PHP loader via its two scheduled-task
+    persistence mechanisms: wscript.exe launching the php.vbs wrapper for
+    base.php (every 3 minutes), and php.exe directly executing bootstrap.php
+    or base.php. Task names end with the executing user's SID and an 8-hex
+    folder hash (StandardUpdate-<SID>-<hash>, TaskService-<SID>-<hash>).
+references:
+    - https://www.bitdefender.com/en-us/blog/labs/sys010-reloaded-malvertising-campaign-targeting-meta-business-accounts
+author: MILO
+date: 2026-11-26
+tags:
+    - attack.persistence
+    - attack.t1053.005
+detection:
+    selection_wscript:
+        Image|endswith: '\wscript.exe'
+        CommandLine|contains|all:
+            - 'php.vbs'
+            - 'base.php'
+    selection_php:
+        Image|endswith: '\php.exe'
+        CommandLine|contains:
+            - 'bootstrap.php'
+            - 'base.php'
+    condition: 1 of selection_*
+logsource:
+    category: process_creation
+    product: windows
+falsepositives:
+    - wscript.exe/php.exe executing arbitrary .vbs/.php files is common in
+      legitimate PHP development environments - the specific filenames
+      (php.vbs, bootstrap.php, base.php) narrow this considerably but verify
+      the parent process and installation path (expected under
+      %LOCALAPPDATA%\<random folder name>) before escalating.
+level: high

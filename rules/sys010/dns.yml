@@ -1,0 +1,63 @@
+title: SYS010 Malvertising - Malicious Domain Query
+id: b224fb89-d6c5-4dbc-a2f5-c4b917a8620d
+status: experimental
+description: |
+    Detects DNS queries for SYS010 (SYS01 v2) malvertising campaign domains
+    across distribution/hosting, PHP loader C2, installer/MDM C2, and browser
+    extension C2 tiers. All hostnames are exact attacker-owned infrastructure
+    (none are shared/legitimate hosting) per Bitdefender's Nov 26, 2026 research.
+references:
+    - https://www.bitdefender.com/en-us/blog/labs/sys010-reloaded-malvertising-campaign-targeting-meta-business-accounts
+author: MILO
+date: 2026-11-26
+tags:
+    - attack.command-and-control
+    - attack.t1102
+detection:
+    selection_hosting:
+        query:
+            - 'wallpapersengine.com'
+            - 'gover.top'
+            - 'wallpapers.top'
+            - 'upfiles.top'
+            - '4kwallpapers.top'
+            - 'wallpaper-engine.pro'
+            - 'pcsofts.site'
+            - 'scontent.storys.top'
+            - 'content.document-hub.top'
+            - 'static.docs-helper.top'
+            - 'best-pc-softs.top'
+            - 'cdn.static-contents.com'
+            - 'cdn.httplivelywallpaper.app'
+    selection_c2_loader:
+        query:
+            - 'shashen.top'
+            - 'okara.top'
+            - 'pitanie.top'
+            - 'volosy.top'
+            - 'geliang.top'
+            - 'sybase.top'
+            - 'avela.top'
+            - 'bmap.top'
+            - 'keshen.top'
+            - 'grosir.top'
+    selection_c2_installer:
+        query:
+            - 'rarer.top'
+            - 'svc.workplace-local.com'
+            - 'schools-account.com'
+    selection_c2_extension:
+        query:
+            - 'lelebag.com'
+            - 'porugo.com'
+            - 'openmagic.net'
+            - 'esora.top'
+            - 'merio.top'
+            - 'dnow.top'
+    condition: 1 of selection_*
+logsource:
+    category: dns
+falsepositives:
+    - None expected - all hostnames are dedicated attacker infrastructure,
+      not shared/legitimate platforms.
+level: high
