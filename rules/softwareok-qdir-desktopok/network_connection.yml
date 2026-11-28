@@ -1,0 +1,21 @@
+title: SoftwareOK Q-Dir/DesktopOK Supply Chain - RAT C2 Network Connection
+id: 3588bc46-e5f9-4463-8418-feddf3a6024b
+status: experimental
+description: Detects outbound TCP connections to the C2 server used by the Python RAT delivered via trojanized Q-Dir/DesktopOK installers
+references:
+    - https://asec.ahnlab.com/en/96827/
+author: MILO
+date: 2026-11-27
+tags:
+    - attack.command-and-control
+    - attack.t1071
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp: '8.210.69.51'
+        DestinationPort: 9876
+    condition: selection
+falsepositives:
+    - None expected - dedicated attacker C2 IP:port
+level: critical

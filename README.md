@@ -19,6 +19,25 @@ Rules here are mostly researched and drafted by AI (open-source threat reporting
 
 ## Incidents covered
 
+### SoftwareOK Q-Dir/DesktopOK - trojanized installer supply chain RAT (Nov 2026)
+
+Installers for two popular free Windows utilities, Q-Dir and DesktopOK,
+distributed from the official SoftwareOK website were tampered with to
+silently install a Python-based RAT alongside the legitimate program
+(AhnLab ASEC, disclosed 2026-11-26). Affected both fresh downloads and the
+self-update path of already-installed copies.
+
+- `rules/softwareok-qdir-desktopok/dns.yml` - payload-hosting domain (c1a2.top)
+- `rules/softwareok-qdir-desktopok/network_connection.yml` - RAT C2 IP:port
+- `rules/softwareok-qdir-desktopok/filehash.yml` - 5 SHA-256 hashes of trojanized installers
+
+**Sources:** [ASEC](https://asec.ahnlab.com/en/96827/), [The Hacker News](https://thehackernews.com/2026/11/hackers-trojanize-official-q-dir-and.html).
+
+**Caveat:** single primary technical source (ASEC); other write-ups are
+derivative of the same dataset. Root cause of the distribution-channel
+compromise is unconfirmed - if SoftwareOK's infrastructure is still
+compromised, expect new hashes/C2 to appear.
+
 ### PolinRider - DPRK GitHub supply chain worm, Nov 2026 update
 
 Self-spreading worm that steals a developer's Git/GitHub credentials and uses

@@ -1,0 +1,24 @@
+title: SoftwareOK Q-Dir/DesktopOK Supply Chain - Malicious DNS Query
+id: bfbca3d0-e4cb-4b86-9bb2-4032a32a7378
+status: experimental
+description: Detects DNS queries to the payload-hosting domain used in the SoftwareOK Q-Dir/DesktopOK trojanized-installer supply chain attack (Python RAT delivery)
+references:
+    - https://asec.ahnlab.com/en/96827/
+author: MILO
+date: 2026-11-27
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+logsource:
+    category: dns
+detection:
+    selection_exact:
+        query:
+            - 'c1a2.top'
+    selection_subdomain:
+        query|endswith:
+            - '.c1a2.top'
+    condition: selection_exact or selection_subdomain
+falsepositives:
+    - None expected - attacker-registered payload-hosting domain
+level: high

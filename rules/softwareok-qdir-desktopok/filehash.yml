@@ -1,0 +1,25 @@
+title: SoftwareOK Q-Dir/DesktopOK Supply Chain - Malicious Installer File Hash
+id: d6141961-5b1d-4ea9-accd-89303237cd50
+status: experimental
+description: Detects known malicious SHA-256 hashes of trojanized Q-Dir/DesktopOK installer files distributed from the official SoftwareOK website
+references:
+    - https://asec.ahnlab.com/en/96827/
+author: MILO
+date: 2026-11-27
+tags:
+    - attack.initial-access
+    - attack.t1195.002
+logsource:
+    category: file_event
+detection:
+    selection:
+        Hashes|contains:
+            - '434b67dd403c74752b336fbb4fc94ee3a6fb615168e3fd31baea71d1a356ecd8'
+            - '1b7b7947527a05f0fae268b16894440549c2dd512d421a06960e27b5fb1d5fa0'
+            - '393d2f9f05affa88aaa19f29f041d28fe5c3e1fc2fd84c76d1e2f1aa6da74a83'
+            - '551e5744b24019f016f9ee8dd3a2c00429da587b20321abaef55c18c0a655a5d'
+            - '5b43284e48edee4acbab49bc5a68eb21d3a369a058d859689b6a5dd2042a5e2a'
+    condition: selection
+falsepositives:
+    - None expected - these are tampered/malicious installer hashes, distinct from SoftwareOK's published legitimate hashes
+level: critical
